@@ -7,9 +7,41 @@ services:
     environment:
       TELEGRAM_WEB_APP_URL: https://${NGROK_DOMAIN}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      DB_CONNECTION_STRING: postgres://guide-bot:guide-bot@postgres-db:5432/guide-bot-system?sslmode=disable
     restart: on-failure
     build:
       context: ./api
+
+  # PostgreSQL DB
+  postgres-db:
+    image: postgres
+    volumes:
+      - guide-bot-pg-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: guide-bot
+      POSTGRES_PASSWORD: guide-bot
+      POSTGRES_DB: guide-bot-system
+    restart: on-failure
+
+  # SQL migrations with go-migrate
+  db-migrator:
+    image: migrate/migrate
+    command: -path=/migrations/ -database postgres://guide-bot:guide-bot@postgres-db:5432/guide-bot-system?sslmode=disable up 
+    volumes:
+      - ./api/db/migrations:/migrations
+    restart: on-failure
+
+  # UI for PostgreSQL DB
+  postgres-admin:
+    image: dpage/pgadmin4
+    volumes:
+      - guide-bot-pg-admin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: on-failure
+    ports:
+      - 8100:80
 
   # Bot UI in development mode
   bot-ui:
@@ -42,3 +74,7 @@ services:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     restart: on-failure
     command: ["http", "--domain=${NGROK_DOMAIN}", "dev-proxy:3000", "--log=stdout"]
+
+volumes:
+  guide-bot-pg-db:
+  guide-bot-pg-admin:
