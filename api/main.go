@@ -9,8 +9,6 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
-const SOURCE_CODE_URL = "https://github.com/st-matskevich/tg-mini-app-template/"
-
 func main() {
 	log.Println("Starting API service")
 
@@ -53,13 +51,11 @@ func CreateBotEndpointHandler(bot *gotgbot.Bot, appURL string) func(http.Respons
 			return
 		}
 
-		message := "Welcome to the Telegram Mini App Template Bot\nTap the button below to open mini app or bot source code"
+		message := "Let's start the tour!🎧\nPlease tap the button below to proceed"
 		opts := &gotgbot.SendMessageOpts{
 			ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 				InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-					{Text: "Open mini app", WebApp: &gotgbot.WebAppInfo{Url: appURL}},
-				}, {
-					{Text: "Open source code", Url: SOURCE_CODE_URL},
+					{Text: "Start", WebApp: &gotgbot.WebAppInfo{Url: appURL}},
 				}},
 			},
 		}

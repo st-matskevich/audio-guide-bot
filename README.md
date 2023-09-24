@@ -1,12 +1,5 @@
-# Telegram Mini App Template
-Template for building Telegram Bots with Mini Apps in React and Go. Deployed instance available at [@tg_mini_app_template_bot](https://t.me/tg_mini_app_template_bot).
-
-## Features
-- Example of creating [Inline Keyboard](https://core.telegram.org/bots/features#inline-keyboards) to interact with the user. Keyboard creation can be found in [main.go](api/main.go)
-- Example of adjusting UI styles to the user's current color theme using [ThemeParams](https://core.telegram.org/bots/webapps#themeparams). CSS variable usage can be found in [App.css](ui/src/App.css)
-- Example of interaction with [telegram-web-app.js](https://core.telegram.org/bots/webapps#initializing-mini-apps) to show a native alert. Script usage can be found in [App.js](ui/src/App.js) 
-- [Local environment](#local-environment) with [docker-compose](https://docs.docker.com/compose/), that serves traffic over HTTPS proxy and automatically applies UI changes without rebuilding the container
-- [Continious deliviery](#production-deployment) to [Google Cloud Platform](https://cloud.google.com/)
+# Audio Guide Bot
+Telegram bot for taking audio tours. Built on top of [Telegram Mini App Template](https://github.com/st-matskevich/tg-mini-app-template). Available at [@audio_guide_bot](https://t.me/audio_guide_bot).
 
 ## Setup prerequisites
 [Telegram Bot](https://core.telegram.org/bots) token is required to interact with [Telegram Bot API](https://core.telegram.org/bots/api). To get one, сreate a bot using [@BotFather](https://t.me/botfather) or follow [Telegram instructions](https://core.telegram.org/bots#how-do-i-create-a-bot).
@@ -34,7 +27,7 @@ docker compose up --build -d
 After successful deployment, your local bot API will be available at https://ngrok-domain/api. Use this URL to set the bot webhook as described [switching bot environment](#switching-bot-environment).
 
 ## Production deployment
-This repository provides a [workflow](https://docs.github.com/actions) to automatically deploy the code to [Google Cloud Platform](https://cloud.google.com/). The deploy job is triggered on each push to the [main](https://github.com/st-matskevich/tg-mini-app-template/tree/main) branch.
+This repository provides a [workflow](https://docs.github.com/actions) to automatically deploy the code to [Google Cloud Platform](https://cloud.google.com/). The deploy job is triggered on each push to the [main](https://github.com/st-matskevich/audio-guide-bot/tree/main) branch.
 
 GCP services used for deployment:
 - [Cloud Run](https://cloud.google.com/run) to host dockerized API and UI code
@@ -73,7 +66,7 @@ After the bot is either [launched locally](#local-environment) or [deployed in G
 curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${BOT_API_URL}/bot
 ```
 
-## Template structure
+## Project structure
 - Project root directory - contains files for [local environment](#local-environment)
   - [docker-compose.yml](docker-compose.yml) - docker-compose file to setup  [local environment](#local-environment)
   - [proxy.template](proxy.template) - nginx config template to route ngrok domain to API and UI containers
@@ -99,4 +92,4 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ## Contributing
 Want a new feature added? Found a bug?
-Go ahead and open [a new issue](https://github.com/st-matskevich/tg-mini-app-template/issues/new) or feel free to submit a pull request.
+Go ahead and open [a new issue](https://github.com/st-matskevich/audio-guide-bot/issues/new) or feel free to submit a pull request.
