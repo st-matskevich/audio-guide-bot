@@ -1,4 +1,4 @@
-module github.com/st-matskevich/tg-mini-app-template/api
+module github.com/st-matskevich/audio-guide-bot/api
 
 go 1.19
 

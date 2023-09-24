@@ -1,4 +1,4 @@
-name: tg-mini-app-template-main-workflow
+name: audio-guide-bot-main-workflow
 on: [push, workflow_dispatch]
 
 jobs:
