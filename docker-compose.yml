@@ -7,6 +7,7 @@ services:
     environment:
       TELEGRAM_WEB_APP_URL: https://${NGROK_DOMAIN}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_PAYMENTS_TOKEN: ${TELEGRAM_PAYMENTS_TOKEN}
       DB_CONNECTION_STRING: postgres://guide-bot:guide-bot@postgres-db:5432/guide-bot-system?sslmode=disable
     restart: on-failure
     build:
