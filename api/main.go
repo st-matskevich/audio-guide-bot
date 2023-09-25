@@ -25,18 +25,20 @@ func main() {
 		DisableColors: true,
 	}))
 
-	token := os.Getenv("TELEGRAM_BOT_TOKEN")
-	botInteractor, err := gotgbot.NewBot(token, nil)
+	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	botInteractor, err := gotgbot.NewBot(botToken, nil)
 	if err != nil {
 		log.Fatalf("Telegram API initialization error: %v", err)
 	}
 	log.Println("Telegram API initialized")
 
 	url := os.Getenv("TELEGRAM_WEB_APP_URL")
+	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
 	controllers := []controller.Controller{
 		&controller.BotController{
-			BotInteractor: botInteractor,
-			WebAppURL:     url,
+			BotInteractor:    botInteractor,
+			WebAppURL:        url,
+			BotPaymentsToken: paymentsToken,
 		},
 	}
 
