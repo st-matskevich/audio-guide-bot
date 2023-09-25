@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/st-matskevich/audio-guide-bot/api/bot"
+	"github.com/st-matskevich/audio-guide-bot/api/repository"
 )
 
 const BUY_TICKET_QUERY = "buy_ticket"
@@ -12,9 +13,10 @@ const TICKET_CURRENCY = "USD"
 const TICKET_PRICE = 100
 
 type BotController struct {
-	BotInteractor    bot.BotInteractor
 	WebAppURL        string
 	BotPaymentsToken string
+	BotInteractor    bot.BotInteractor
+	TicketRepository repository.TicketRepository
 }
 
 func (controller *BotController) GetRoutes() []Route {
@@ -52,13 +54,18 @@ func (controller *BotController) HandleBotUpdate(c *fiber.Ctx) error {
 
 func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *gotgbot.Update) error {
 	if update.Message.SuccessfulPayment != nil {
-		ticketID, err := uuid.Parse(update.Message.SuccessfulPayment.InvoicePayload)
+		ticketCode, err := uuid.Parse(update.Message.SuccessfulPayment.InvoicePayload)
 		if err != nil {
 			HandlerPrintf(c, "Failed to parse bot payment payload - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to parse bot payment payload")
 		}
 
-		message := controller.buildPurchaseMessage(ticketID)
+		if err = controller.TicketRepository.CreateTicket(ticketCode.String()); err != nil {
+			HandlerPrintf(c, "Failed to register ticket in DB - %v", err)
+			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to register ticket in DB")
+		}
+
+		message := controller.buildPurchaseMessage(ticketCode)
 		if _, err := controller.BotInteractor.SendMessage(update.Message.Chat.Id, message.Message, message.Options); err != nil {
 			HandlerPrintf(c, "Failed to send bot message - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
@@ -96,8 +103,8 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot
 		title := "Tour ticket"
 		description := "Ticket that allows to start the tour"
 		price := []gotgbot.LabeledPrice{{Label: "Price", Amount: int64(TICKET_PRICE)}}
-		ticketID := uuid.New()
-		if _, err := controller.BotInteractor.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketID.String(), controller.BotPaymentsToken, TICKET_CURRENCY, price, nil); err != nil {
+		ticketCode := uuid.New()
+		if _, err := controller.BotInteractor.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), controller.BotPaymentsToken, TICKET_CURRENCY, price, nil); err != nil {
 			HandlerPrintf(c, "Failed to send bot invoice - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot invoice")
 		}
@@ -152,8 +159,8 @@ func (controller *BotController) buildWelcomeMessage() BotMessage {
 	return BotMessage{Message: message, Options: opts}
 }
 
-func (controller *BotController) buildPurchaseMessage(ticketID uuid.UUID) BotMessage {
-	message := "Thank you for your purchase!\nYour ticket number: " + ticketID.String() + "\nPlease tap the button below to proceed"
+func (controller *BotController) buildPurchaseMessage(ticketCode uuid.UUID) BotMessage {
+	message := "Thank you for your purchase!\nYour ticket number: " + ticketCode.String() + "\nPlease tap the button below to proceed"
 	opts := &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{

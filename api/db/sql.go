@@ -45,9 +45,18 @@ func (provider *SQLDBProvider) Query(query string, args ...interface{}) (DBReade
 	return &SQLDBReader{rows: response}, err
 }
 
-func (provider *SQLDBProvider) Exec(query string, args ...interface{}) error {
-	_, err := provider.connection.Exec(query, args...)
-	return err
+func (provider *SQLDBProvider) Exec(query string, args ...interface{}) (int64, error) {
+	result, err := provider.connection.Exec(query, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rows, nil
 }
 
 func (provider *SQLDBProvider) Migrate() error {

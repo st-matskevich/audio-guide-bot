@@ -1,4 +1,4 @@
 CREATE TABLE tickets(
     ticket_id BIGSERIAL PRIMARY KEY, 
-    code VARCHAR(64) NOT NULL,
+    code VARCHAR(64) NOT NULL UNIQUE,
     used BOOLEAN NOT NULL DEFAULT false);

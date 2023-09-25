@@ -8,6 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/st-matskevich/audio-guide-bot/api/controller"
+	"github.com/st-matskevich/audio-guide-bot/api/db"
+	"github.com/st-matskevich/audio-guide-bot/api/repository"
 )
 
 func main() {
@@ -32,13 +34,22 @@ func main() {
 	}
 	log.Println("Telegram API initialized")
 
-	url := os.Getenv("TELEGRAM_WEB_APP_URL")
+	dbURL := os.Getenv("DB_CONNECTION_STRING")
+	dbProvider, err := db.CreatePostgreSQLDBProvider(dbURL)
+	if err != nil {
+		log.Fatalf("PostgreSQL initialization error: %v", err)
+	}
+	log.Println("PostgreSQL initialized")
+
+	webAppURL := os.Getenv("TELEGRAM_WEB_APP_URL")
 	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
+	repository := repository.Repository{DBProvider: dbProvider}
 	controllers := []controller.Controller{
 		&controller.BotController{
-			BotInteractor:    botInteractor,
-			WebAppURL:        url,
+			WebAppURL:        webAppURL,
 			BotPaymentsToken: paymentsToken,
+			BotInteractor:    botInteractor,
+			TicketRepository: &repository,
 		},
 	}
 
