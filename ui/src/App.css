@@ -1,42 +1,15 @@
+/* Example of adjusting UI styles to the user's current color theme using ThemeParams */
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-/* Example of adjusting UI styles to the user's current color theme using ThemeParams */
-.App-header {
   background-color: var(--tg-theme-bg-color);
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: var(--tg-theme-text-color);
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  height: min(100%, var(--tg-viewport-stable-height));
+  transition: height .5s ease;
 }
 
 .button {
@@ -46,4 +19,38 @@
   background-color: var(--tg-theme-button-color);
   color: var(--tg-theme-button-text-color);
   user-select: none;
+}
+
+.preloader {
+  border: 8px solid var(--tg-theme-secondary-bg-color);
+  border-top: 8px solid var(--tg-theme-hint-color);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}
+
+.scanner-wrapper,
+.no-ticket-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.scanner-wrapper span,
+.no-ticket-wrapper span {
+  margin: 0 8px;
+}
+
+.scanner-wrapper .button,
+.no-ticket-wrapper .button {
+  margin: 15px 8px 0;
 }

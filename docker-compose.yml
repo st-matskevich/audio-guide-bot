@@ -49,6 +49,7 @@ services:
     environment:
       WATCHPACK_POLLING: true
       WDS_SOCKET_PORT: 443
+      REACT_APP_BOT_API_URL: https://${NGROK_DOMAIN}/api
     restart: on-failure
     volumes:
       - ./ui:/app
