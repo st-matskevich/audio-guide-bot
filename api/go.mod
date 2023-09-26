@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.22
 	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/google/uuid v1.3.1
 	github.com/lib/pq v1.10.9

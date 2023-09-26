@@ -160,11 +160,13 @@ func (controller *BotController) buildWelcomeMessage() BotMessage {
 }
 
 func (controller *BotController) buildPurchaseMessage(ticketCode uuid.UUID) BotMessage {
-	message := "Thank you for your purchase!\nYour ticket number: " + ticketCode.String() + "\nPlease tap the button below to proceed"
+	ticketString := ticketCode.String()
+	message := "Thank you for your purchase!\nYour ticket number: " + ticketString + "\nPlease tap the button below to proceed"
+	appURL := controller.WebAppURL + "?ticket=" + ticketString
 	opts := &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-				{Text: "Start the tour", WebApp: &gotgbot.WebAppInfo{Url: controller.WebAppURL}},
+				{Text: "Start the tour", WebApp: &gotgbot.WebAppInfo{Url: appURL}},
 			}},
 		},
 	}

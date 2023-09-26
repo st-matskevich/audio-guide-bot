@@ -43,12 +43,17 @@ func main() {
 
 	webAppURL := os.Getenv("TELEGRAM_WEB_APP_URL")
 	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
+	jwtSecret := os.Getenv("JWT_SECRET")
 	repository := repository.Repository{DBProvider: dbProvider}
 	controllers := []controller.Controller{
 		&controller.BotController{
 			WebAppURL:        webAppURL,
 			BotPaymentsToken: paymentsToken,
 			BotInteractor:    botInteractor,
+			TicketRepository: &repository,
+		},
+		&controller.TicketsController{
+			JWTSecret:        []byte(jwtSecret),
 			TicketRepository: &repository,
 		},
 	}
