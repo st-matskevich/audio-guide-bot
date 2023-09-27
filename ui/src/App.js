@@ -1,12 +1,9 @@
 import './App.css';
 import { useEffect, useState } from "react"
-import jwt_decode from "jwt-decode";
-import { getCloudValue, setCloudValue } from './api/telegram';
-import { exchangeTicketForToken } from './api/guide';
+import { addTokenListener, removeTokenListener } from './api/auth';
 
 function App() {
   const onScanQRClicked = () => {
-    // Example of interaction with telegram-web-app.js script to show a native alert
     window.Telegram.WebApp.showScanQrPopup({}, () => { return true; });
   };
 
@@ -20,58 +17,17 @@ function App() {
   })
 
   useEffect(() => {
-    // - load token from CloudStorage
-    // - verify token
-    // - if token is null or expired AND ticket is not null
-    // -- exchange ticket for token
-    // -- save token to CloudStorage
-    const CLOUD_TOKEN_KEY = "AUTH_TOKEN"
-
-    // refreshes token if needed
-    const refreshToken = (jwt) => {
-      return new Promise((resolve, reject) => {
-        const isValidToken = jwt?.claims?.exp > Date.now() / 1000;
-        if (isValidToken) {
-          return resolve(jwt.token);
-        }
-
-        const queryParameters = new URLSearchParams(window.location.search);
-        const ticket = queryParameters.get("ticket");
-        if (ticket == null) {
-          return resolve(null);
-        }
-
-        exchangeTicketForToken(ticket).then((response) => {
-          const token = response.data.data.token;
-          setCloudValue(CLOUD_TOKEN_KEY, token).then(() => {
-            return resolve(token)
-          })
-        }).catch((err) => {
-          return reject(err)
-        })
-      })
-    }
-
-    // decodes JWT if valid
-    const decodeJWT = (value) => {
-      try {
-        return { token: value, claims: jwt_decode(value) }
-      } catch (err) {
-        return null;
-      }
-    }
-
-    getCloudValue(CLOUD_TOKEN_KEY).then((value) => {
-      return decodeJWT(value)
-    }).then((jwt) => {
-      return refreshToken(jwt)
-    }).then((token) => {
+    const onTokenChanged = (event) => {
       setTokenState({
         loaded: true,
-        token: token
+        token: event.detail
       })
-    })
+    };
 
+    addTokenListener(onTokenChanged);
+    return () => {
+      removeTokenListener(onTokenChanged);
+    }
   }, [])
 
   const getUI = () => {
