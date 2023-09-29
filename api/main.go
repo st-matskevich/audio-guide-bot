@@ -7,6 +7,8 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/st-matskevich/audio-guide-bot/api/auth"
+	"github.com/st-matskevich/audio-guide-bot/api/blob"
 	"github.com/st-matskevich/audio-guide-bot/api/controller"
 	"github.com/st-matskevich/audio-guide-bot/api/db"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
@@ -41,9 +43,18 @@ func main() {
 	}
 	log.Println("PostgreSQL initialized")
 
+	s3URL := os.Getenv("S3_CONNECTION_STRING")
+	blobProvider, err := blob.CreateS3BlobProvider(s3URL)
+	if err != nil {
+		log.Fatalf("S3 blob provider initialization error: %v", err)
+	}
+	log.Println("S3 blob provider initialized")
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	tokenProvier := auth.JWTTokenProvider{JWTSecret: []byte(jwtSecret)}
+
 	webAppURL := os.Getenv("TELEGRAM_WEB_APP_URL")
 	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
-	jwtSecret := os.Getenv("JWT_SECRET")
 	repository := repository.Repository{DBProvider: dbProvider}
 	controllers := []controller.Controller{
 		&controller.BotController{
@@ -53,8 +64,13 @@ func main() {
 			TicketRepository: &repository,
 		},
 		&controller.TicketsController{
-			JWTSecret:        []byte(jwtSecret),
+			TokenProvider:    &tokenProvier,
 			TicketRepository: &repository,
+		},
+		&controller.ObjectsController{
+			TokenProvider:    &tokenProvier,
+			BlobProvider:     blobProvider,
+			ObjectRepository: &repository,
 		},
 	}
 
