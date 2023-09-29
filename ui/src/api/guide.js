@@ -6,6 +6,14 @@ export const exchangeTicketForToken = (ticket) => {
     return axios.post(`${URL_BASE}/tickets/${ticket}/token`, {});
 };
 
+export const getObjectData = (accessToken, objectCode) => {
+    return axios.get(`${URL_BASE}/objects/${objectCode}`, {
+        headers: {
+            "Authorization": accessToken
+        }
+    });
+}
+
 export const getObjectCoverURL = (accessToken, objectCode) => {
     return `${URL_BASE}/objects/${objectCode}/cover?access-token=${accessToken}`
 }
