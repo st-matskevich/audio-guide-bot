@@ -1,16 +1,18 @@
 import './App.css';
 import { useEffect, useState } from "react"
 import { addTokenListener, removeTokenListener } from './api/auth';
+import ObjectViewerComponent from './ObjectViewerComponent'
 
 function App() {
   const onScanQRClicked = () => {
-    window.Telegram.WebApp.showScanQrPopup({}, () => { return true; });
+    window.Telegram.WebApp.showScanQrPopup({});
   };
 
   const onCloseClicked = () => {
     window.Telegram.WebApp.close();
   }
 
+  const [scannedObject, setScannedObject] = useState(null)
   const [tokenState, setTokenState] = useState({
     loaded: false,
     token: null
@@ -30,6 +32,32 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    const onBackClicked = () => {
+      window.Telegram.WebApp.BackButton.isVisible = false;
+      setScannedObject(null);
+    }
+
+    window.Telegram.WebApp.BackButton.onClick(onBackClicked);
+    return () => {
+      window.Telegram.WebApp.BackButton.offClick(onBackClicked);
+    }
+  }, [])
+
+  useEffect(() => {
+    const QR_EVENT = "qrTextReceived";
+    const onQRTextReceived = (event) => {
+      window.Telegram.WebApp.closeScanQrPopup();
+      window.Telegram.WebApp.BackButton.isVisible = true;
+      setScannedObject(event.data);
+    }
+
+    window.Telegram.WebApp.onEvent(QR_EVENT, onQRTextReceived);
+    return () => {
+      window.Telegram.WebApp.offEvent(QR_EVENT, onQRTextReceived);
+    }
+  }, [])
+
   const getUI = () => {
     if (!tokenState.loaded) {
       return (<div className="preloader" />)
@@ -41,7 +69,7 @@ function App() {
           <div className="button" onClick={onCloseClicked}>Close app</div>
         </div>
       )
-    } else {
+    } else if (scannedObject == null) {
       return (
         <div className="scanner-wrapper">
           <span>Welcome to the tour!</span>
@@ -49,6 +77,8 @@ function App() {
           <div className="button" onClick={onScanQRClicked}>Scan QR</div>
         </div>
       )
+    } else {
+      return <ObjectViewerComponent />
     }
   }
 
