@@ -17,10 +17,7 @@ import (
 func main() {
 	log.Println("Starting API service")
 
-	app := fiber.New(fiber.Config{
-		// Allows to get body as io.Reader/io.Writer
-		StreamRequestBody: true,
-	})
+	app := fiber.New()
 
 	// Set logger format to be equal to controller.HandlerPrintf
 	app.Use(logger.New(logger.Config{

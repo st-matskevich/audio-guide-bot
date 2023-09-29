@@ -48,7 +48,6 @@ func (controller *BotController) HandleBotUpdate(c *fiber.Ctx) error {
 		return controller.HandleBotMessage(c, &update)
 	}
 
-	// TODO: should we return error in case if no handlers were called?
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
 }
 
@@ -112,7 +111,6 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot
 		return HandlerSendSuccess(c, fiber.StatusOK, nil)
 	}
 
-	// TODO: should we return error in case if no handlers were called?
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
 }
 
