@@ -58,7 +58,9 @@ func (controller *ObjectsController) HandleGetObject(c *fiber.Ctx) error {
 }
 
 func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
-	authHeader := c.Get("Authorization")
+	// Resources are loaded by HTML components thus it's not possible to pass an access token as a header
+	// URL parameter have to be used instead
+	authHeader := c.Query("access-token")
 	_, tokenValid, err := controller.TokenProvider.Verify(authHeader)
 
 	if err != nil {
@@ -88,7 +90,9 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 }
 
 func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
-	authHeader := c.Get("Authorization")
+	// Resources are loaded by HTML components thus it's not possible to pass an access token as a header
+	// URL parameter have to be used instead
+	authHeader := c.Query("access-token")
 	_, tokenValid, err := controller.TokenProvider.Verify(authHeader)
 
 	if err != nil {
@@ -114,5 +118,8 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 		return HandlerSendFailure(c, fiber.StatusInternalServerError, "Blob read failed")
 	}
 
+	// TODO: Accept-Ranges header allows seeking in the player,
+	// but proper Range header handling still needs to be implemented
+	c.Set("Accept-Ranges", "bytes")
 	return c.SendStatus(fiber.StatusOK)
 }
