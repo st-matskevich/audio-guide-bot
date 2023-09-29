@@ -78,7 +78,7 @@ function App() {
         </div>
       )
     } else {
-      return <ObjectViewerComponent />
+      return <ObjectViewerComponent AccessToken={tokenState.token} ObjectCode={scannedObject}/>
     }
   }
 

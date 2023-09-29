@@ -4,11 +4,14 @@ import { ReactComponent as PlayIcon } from './assets/play.svg'
 import { ReactComponent as PauseIcon } from './assets/pause.svg'
 import { ReactComponent as QRIcon } from './assets/qr-code.svg'
 import { useRef, useState, useEffect } from "react"
+import { getObjectAudioURL, getObjectCoverURL } from './api/guide';
 
-import cover from './assets/test/cover.jpg';
-import track from './assets/test/audio.mp3';
+function ObjectViewerComponent(props) {
+    const objectCode = props.ObjectCode;
+    const accessToken = props.AccessToken;
+    const audioURL = getObjectAudioURL(accessToken, objectCode);
+    const coverURL = getObjectCoverURL(accessToken, objectCode);
 
-function ObjectViewerComponent() {
     const onScanQRClicked = () => {
         window.Telegram.WebApp.showScanQrPopup({});
     };
@@ -17,12 +20,12 @@ function ObjectViewerComponent() {
 
     useEffect(() => {
         const ref = audioRef.current;
-        ref.src = track;
+        ref.src = audioURL;
 
         return () => {
             ref.pause();
         };
-    }, []);
+    }, [audioURL]);
 
     const [audioPlaying, setAudioPlaying] = useState(false);
     const toggleAudioPlay = () => {
@@ -81,7 +84,7 @@ function ObjectViewerComponent() {
     return (
         <div className="object-viewer-wrapper">
             <div className="image-viewer">
-                <img src={cover} alt="cover" />
+                <img src={coverURL} alt="cover" />
             </div>
             <div className="object-title">Cat King</div>
             <ReactSlider className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
