@@ -2,6 +2,7 @@ package bot
 
 import "github.com/PaulSonOfLars/gotgbot/v2"
 
+// TODO: rewrite this provider to hide implementation details from consumers
 type BotInteractor interface {
 	SendMessage(chatId int64, text string, opts *gotgbot.SendMessageOpts) (*gotgbot.Message, error)
 	AnswerCallbackQuery(callbackQueryId string, opts *gotgbot.AnswerCallbackQueryOpts) (bool, error)

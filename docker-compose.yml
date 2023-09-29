@@ -8,7 +8,8 @@ services:
       TELEGRAM_WEB_APP_URL: https://${NGROK_DOMAIN}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_PAYMENTS_TOKEN: ${TELEGRAM_PAYMENTS_TOKEN}
-      DB_CONNECTION_STRING: postgres://guide-bot:guide-bot@postgres-db:5432/guide-bot-system?sslmode=disable
+      DB_CONNECTION_STRING: postgres://guide:guide@postgres-db:5432/guide-system?sslmode=disable
+      S3_CONNECTION_STRING: s3://guide:guide@s3-mock:7480/guide-objects?ssl=false
     restart: on-failure
     build:
       context: ./api
@@ -17,17 +18,17 @@ services:
   postgres-db:
     image: postgres
     volumes:
-      - guide-bot-pg-db:/var/lib/postgresql/data
+      - guide-pg-db:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: guide-bot
-      POSTGRES_PASSWORD: guide-bot
-      POSTGRES_DB: guide-bot-system
+      POSTGRES_USER: guide
+      POSTGRES_PASSWORD: guide
+      POSTGRES_DB: guide-system
     restart: on-failure
 
   # SQL migrations with go-migrate
   db-migrator:
     image: migrate/migrate
-    command: -path=/migrations/ -database postgres://guide-bot:guide-bot@postgres-db:5432/guide-bot-system?sslmode=disable up 
+    command: -path=/migrations/ -database postgres://guide:guide@postgres-db:5432/guide-system?sslmode=disable up 
     volumes:
       - ./api/db/migrations:/migrations
     restart: on-failure
@@ -36,13 +37,32 @@ services:
   postgres-admin:
     image: dpage/pgadmin4
     volumes:
-      - guide-bot-pg-admin:/var/lib/pgadmin
+      - guide-pg-admin:/var/lib/pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: admin
     restart: on-failure
     ports:
       - 8100:80
+
+  # Mocked S3 server
+  s3-mock:
+    image: quay.io/s3gw/s3gw
+    volumes:
+      - guide-s3:/data
+    environment:
+      RGW_DEFAULT_USER_ACCESS_KEY: guide
+      RGW_DEFAULT_USER_SECRET_KEY: guide
+    restart: on-failure
+
+  # UI for S3 server
+  s3-ui:
+    image: quay.io/s3gw/s3gw-ui
+    environment:
+      S3GW_SERVICE_URL: http://s3-mock:7480
+    restart: on-failure
+    ports:
+      - 8200:8080
 
   # Bot UI in development mode
   bot-ui:
@@ -78,5 +98,6 @@ services:
     command: ["http", "--domain=${NGROK_DOMAIN}", "dev-proxy:3000", "--log=stdout"]
 
 volumes:
-  guide-bot-pg-db:
-  guide-bot-pg-admin:
+  guide-s3:
+  guide-pg-db:
+  guide-pg-admin:
