@@ -50,7 +50,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: guide-bot-system
+          POSTGRES_DB: guide-system
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -61,10 +61,10 @@ jobs:
         uses: actions/checkout@v3
     
       - name: Migrate Up
-        run: migrate -path=./api/db/migrations/ -database postgres://postgres:postgres@postgres-db:5432/guide-bot-system?sslmode=disable up 
+        run: migrate -path=./api/db/migrations/ -database postgres://postgres:postgres@postgres-db:5432/guide-system?sslmode=disable up 
 
       - name: Migrate Down
-        run: migrate -path=./api/db/migrations/ -database postgres://postgres:postgres@postgres-db:5432/guide-bot-system?sslmode=disable down -all
+        run: migrate -path=./api/db/migrations/ -database postgres://postgres:postgres@postgres-db:5432/guide-system?sslmode=disable down -all
   
   deploy-ui:
     needs: [build-api, build-ui, test-migrations]
@@ -123,7 +123,9 @@ jobs:
       API_SERVICE: ${{ vars.GCP_SERVICE_API_NAME }}
       API_MAX_INSTANCES: ${{ vars.GCP_SERVICE_API_MAX_INSTANCES }}
       API_IMAGE: ${{ vars.GCP_PROJECT_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY }}/${{ vars.GCP_SERVICE_API_NAME }}:${{  github.sha }}
-      TG_TOKEN_SECRET: ${{ vars.GCP_SECRET_TG_TOKEN }}
+      TG_TOKEN_SECRET: ${{ vars.GCP_SECRET_TG_BOT_TOKEN }}
+      TG_PAYMENTS_SECRET: ${{ vars.GCP_SECRET_TG_PAYMENTS_TOKEN }}
+      JWT_SECRET: ${{ vars.GCP_SECRET_JWT_SECRET }}
     runs-on: ubuntu-latest
     defaults:
       run:
