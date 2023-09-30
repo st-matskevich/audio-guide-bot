@@ -13,6 +13,8 @@ Local environment includes:
 - [ngrok](https://ngrok.com/) reverse proxy to server local mini-app and bot deployment over HTTPS
 - [nginx](https://www.nginx.com/) reverse proxy to host both API and UI on one ngrok domain and thus fit into the [free plan](https://ngrok.com/pricing)
 - React fast refresh to avoid rebuilding docker container on each change of the UI code
+- [PostgreSQL](https://www.postgresql.org/) database instance and [pgAdmin](https://github.com/pgadmin-org/pgadmin4) instance to manage it
+- [s3gw](https://github.com/aquarist-labs/s3gw) S3 instance and [s3gw-ui](https://github.com/aquarist-labs/s3gw-ui) instance to manage it
 
 Local environment setup:
 1. Create an account on [ngrok](https://ngrok.com/)
@@ -20,7 +22,7 @@ Local environment setup:
 0. Claim a [free ngrok domain](https://ngrok.com/blog-post/free-static-domains-ngrok-users) and save it to `NGROK_DOMAIN` variable in `.env` file in the project root directory
 0. Copy [Telegram Bot token](#setup-prerequisites) and save it to `TELEGRAM_BOT_TOKEN` variable in `.env` file in the project root directory
 0. Copy [Telegram Payments token](#setup-prerequisites) and save it to `TELEGRAM_PAYMENTS_TOKEN` variable in `.env` file in the project root directory
-0. Generate random string for JWT secret and save it to `JWT_SECRET` variable in `.env` file in the project root directory
+0. Generate random string for JWT signing secret and save it to `JWT_SECRET` variable in `.env` file in the project root directory
 0. Install [Docker](https://docs.docker.com/get-docker/)
 
 To start or update the environment with the latest code changes, use:
@@ -37,6 +39,7 @@ GCP services used for deployment:
 - [Cloud Run](https://cloud.google.com/run) to host dockerized API and UI code
 - [Artifact Registry](https://cloud.google.com/artifact-registry) to store docker images
 - [Secret Manager](https://cloud.google.com/secret-manager) to store sensitive data
+- [Cloud SQL](https://cloud.google.com/sql) to host relational database
 
 Deployment setup:
 1. [Create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project) in GCP
@@ -47,17 +50,35 @@ Deployment setup:
     - Cloud Run Admin (to create Cloud Run instances)
     - Artifact Registry Administrator (to manage images in the registry)
     - Secret Manager Secret Accessor (to access GCP secrets)
+    - Cloud SQL Client (to connect to the Cloud SQL instance)
 0. Copy the service account email and save it to `GCP_SA_EMAIL` GitHub variable
 0. [Export the service account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) and save it to `GCP_SA_KEY` GitHub secret
 0. Enable the following GCP APIs:
     - Cloud Run Admin API (to create Cloud Run instances)
     - Secret Manager API (to securely store secrets)
+    - Compute Engine API (to create Cloud SQL instances)
 0. Create [Artifact Registry for Docker images](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images#create) in `GCP_PROJECT_REGION` region
 0. Copy Artifact Registry name and save it to `GCP_ARTIFACT_REGISTRY` GitHub variable
+0. [Create a PostgreSQL Cloud SQL instance](https://cloud.google.com/sql/docs/postgres/create-instance#create-2nd-gen) in `GCP_PROJECT_REGION` region
+    - If you want to reduce the cost of the instance:
+      - You can implement [instance scheduler](https://cloud.google.com/blog/topics/developers-practitioners/lower-development-costs-schedule-cloud-sql-instances-start-and-stop)
+      - You can set "Zonal availability" to "Single zone" instead of "Multiple zones (Highly available)"
+      - You can set machine configuration to the minimal one (1 shared vCPU, 0.614 GB RAM)
+      - You can set storage type to HDD
+      - You can reduce storage size to 10 GB
+0. Copy Cloud SQL instance connection name and save it to `GCP_SQL_INSTANCE_CONNECTION_NAME` GitHub variable
+0. [Create a user](https://cloud.google.com/sql/docs/postgres/create-manage-users#creating) for your Cloud SQL instance
+0. [Create a database](https://cloud.google.com/sql/docs/postgres/create-manage-databases#create) for your Cloud SQL instance
 0. [Create the following secrets](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#create) in Secret Manager:
     - [Telegram Bot token](#setup-prerequisites) and save it name to `GCP_SECRET_TG_BOT_TOKEN` GitHub variable
     - [Telegram Payments token](#setup-prerequisites) and save it name to `GCP_SECRET_TG_PAYMENTS_TOKEN` GitHub variable
-    - JWT signing secret and save it name to `GCP_SECRET_JWT_SECRET` GitHub variable
+    - Random string for JWT signing secret and save it name to `GCP_SECRET_JWT_SECRET` GitHub variable
+    - PostgreSQL connection string and save it name to `GCP_SECRET_DB_URL` GitHub variable
+      - Connection string format is `postgres://{USER}:{PASSWORD}@{HOST}/{DATABASE}`, where:
+        - {USER} is the name of the user created for Cloud SQL instance above
+        - {PASSWORD} is the password of the user created for Cloud SQL instance above
+        - {HOST} is the instance connection string for the Cloud SQL instance, you can find it on the Overview page for your instance
+        - {DATABASE} is the name of the database created for Cloud SQL instance above
 0. Define the following GitHub variables:
     - `GCP_SERVICE_MIGRATOR_NAME` with the desired name of Migrator Cloud Run instance 
     - `GCP_SERVICE_UI_NAME` with the desired name of UI Cloud Run instance 
@@ -96,6 +117,8 @@ curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${BOT_API_
 - [minio-go](https://github.com/minio/minio-go)
 - [migrate](https://github.com/golang-migrate/migrate)
 - [s3gw](https://github.com/aquarist-labs/s3gw)
+- [s3gw-ui](https://github.com/aquarist-labs/s3gw-ui)
+- [pgAdmin](https://github.com/pgadmin-org/pgadmin4)
 - [nginx](https://www.nginx.com/)
 - [ngrok](https://ngrok.com/)
 

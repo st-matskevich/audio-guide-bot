@@ -66,9 +66,82 @@ jobs:
       - name: Migrate Down
         run: migrate -path=./api/db/migrations/ -database postgres://postgres:postgres@postgres-db:5432/guide-system?sslmode=disable down -all
   
-  deploy-ui:
+  push-containers:
     needs: [build-api, build-ui, test-migrations]
     if: ${{ github.ref == 'refs/heads/main' }}
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
+      SERVICE_ACCOUNT: ${{ vars.GCP_SA_EMAIL }}
+      UI_IMAGE: ${{ vars.GCP_PROJECT_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY }}/${{ vars.GCP_SERVICE_UI_NAME }}:${{  github.sha }}
+      API_IMAGE: ${{ vars.GCP_PROJECT_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY }}/${{ vars.GCP_SERVICE_API_NAME }}:${{  github.sha }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Authenticate Cloud CLI
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Setup Cloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker ${{ env.PROJECT_REGION }}-docker.pkg.dev
+
+      - name: Build and Push API Container
+        run: |-
+          docker build -t ${{ env.API_IMAGE }} ./api
+          docker push ${{ env.API_IMAGE }}
+
+      - name: Build and Push UI Container
+        run: |-
+          docker build -t ${{ env.UI_IMAGE }} ./ui -f ./ui/prod.dockerfile
+          docker push ${{ env.UI_IMAGE }}
+  
+  deploy-migrator:
+    needs: [push-containers]
+    if: ${{ github.ref == 'refs/heads/main' }}
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
+      SERVICE_ACCOUNT: ${{ vars.GCP_SA_EMAIL }}
+      API_IMAGE: ${{ vars.GCP_PROJECT_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY }}/${{ vars.GCP_SERVICE_API_NAME }}:${{  github.sha }}
+      MIGRATOR_SERVICE: ${{ vars.GCP_SERVICE_MIGRATOR_NAME }}
+      SQL_INSTANCE_NAME: ${{ vars.GCP_SQL_INSTANCE_CONNECTION_NAME }}
+      DB_URL_SECRET: ${{ vars.GCP_SECRET_DB_URL }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Authenticate Cloud CLI
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Setup Cloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Deploy migration job to Cloud Run
+        run: |-
+          gcloud --quiet run jobs deploy ${{ env.MIGRATOR_SERVICE }} \
+          --image=${{ env.API_IMAGE }} \
+          --region=${{ env.PROJECT_REGION }} \
+          --service-account=${{ env.SERVICE_ACCOUNT }} \
+          --add-cloudsql-instances=${{ env.SQL_INSTANCE_NAME }} \
+          --set-secrets=DB_CONNECTION_STRING=${{ env.SECRET_DB_URL }}:latest \
+          --args=--migrate \
+          --max-retries=3 \
+          --execute-now \
+          --wait
+
+
+  deploy-ui:
+    needs: [deploy-migrator]
+    #if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ false }}
     env:
       PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
@@ -113,7 +186,8 @@ jobs:
 
   deploy-api:
     needs: [deploy-ui]
-    if: ${{ github.ref == 'refs/heads/main' }}
+    # if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ false }}
     env:
       PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       PROJECT_REGION: ${{ vars.GCP_PROJECT_REGION }}
