@@ -51,3 +51,15 @@ func (provider *JWTTokenProvider) Verify(token string) (TokenClaims, bool, error
 
 	return result, true, nil
 }
+
+func CreateJWTTokenProvider(secret string) (TokenProvider, error) {
+	if secret == "" {
+		return nil, errors.New("secret is empty")
+	}
+
+	provider := JWTTokenProvider{
+		JWTSecret: []byte(secret),
+	}
+
+	return &provider, nil
+}

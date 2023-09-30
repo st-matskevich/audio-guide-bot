@@ -61,7 +61,11 @@ func main() {
 	log.Println("S3 blob provider initialized")
 
 	jwtSecret := os.Getenv("JWT_SECRET")
-	tokenProvier := auth.JWTTokenProvider{JWTSecret: []byte(jwtSecret)}
+	tokenProvier, err := auth.CreateJWTTokenProvider(jwtSecret)
+	if err != nil {
+		log.Fatalf("JWT token provider initialization error: %v", err)
+	}
+	log.Println("JWT token provider initialized")
 
 	webAppURL := os.Getenv("TELEGRAM_WEB_APP_URL")
 	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
@@ -74,11 +78,11 @@ func main() {
 			TicketRepository: &repository,
 		},
 		&controller.TicketsController{
-			TokenProvider:    &tokenProvier,
+			TokenProvider:    tokenProvier,
 			TicketRepository: &repository,
 		},
 		&controller.ObjectsController{
-			TokenProvider:    &tokenProvier,
+			TokenProvider:    tokenProvier,
 			BlobProvider:     blobProvider,
 			ObjectRepository: &repository,
 		},

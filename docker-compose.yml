@@ -8,6 +8,7 @@ services:
       TELEGRAM_WEB_APP_URL: https://${NGROK_DOMAIN}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_PAYMENTS_TOKEN: ${TELEGRAM_PAYMENTS_TOKEN}
+      JWT_SECRET: ${JWT_SECRET}
       DB_CONNECTION_STRING: postgres://guide:guide@postgres-db:5432/guide-system?sslmode=disable
       S3_CONNECTION_STRING: s3://guide:guide@s3-mock:7480/guide-objects?ssl=false
     restart: on-failure
