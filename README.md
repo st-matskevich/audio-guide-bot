@@ -40,6 +40,7 @@ GCP services used for deployment:
 - [Artifact Registry](https://cloud.google.com/artifact-registry) to store docker images
 - [Secret Manager](https://cloud.google.com/secret-manager) to store sensitive data
 - [Cloud SQL](https://cloud.google.com/sql) to host relational database
+- [Cloud Storage](https://cloud.google.com/storage) to store binary data
 
 Deployment setup:
 1. [Create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project) in GCP
@@ -51,6 +52,7 @@ Deployment setup:
     - Artifact Registry Administrator (to manage images in the registry)
     - Secret Manager Secret Accessor (to access GCP secrets)
     - Cloud SQL Client (to connect to the Cloud SQL instance)
+    - Storage Object User (to access objects in Cloud Storage bucket)
 0. Copy the service account email and save it to `GCP_SA_EMAIL` GitHub variable
 0. [Export the service account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) and save it to `GCP_SA_KEY` GitHub secret
 0. Enable the following GCP APIs:
@@ -70,16 +72,23 @@ Deployment setup:
 0. Copy Cloud SQL instance connection name, which can be found on the Overview page for your instance, and save it to `GCP_SQL_INSTANCE_CONNECTION_NAME` GitHub variable
 0. [Create a user](https://cloud.google.com/sql/docs/postgres/create-manage-users#creating) for your Cloud SQL instance
 0. [Create a database](https://cloud.google.com/sql/docs/postgres/create-manage-databases#create) for your Cloud SQL instance
+0. [Create a Cloud Storage bucket](https://cloud.google.com/storage/docs/creating-buckets#create_a_new_bucket) in `GCP_PROJECT_REGION` region
+0. [Create an HMAC key](https://cloud.google.com/storage/docs/authentication/managing-hmackeys#create) for your service account
 0. [Create the following secrets](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#create) in Secret Manager:
-    - [Telegram Bot token](#setup-prerequisites) and save it name to `GCP_SECRET_TG_BOT_TOKEN` GitHub variable
-    - [Telegram Payments token](#setup-prerequisites) and save it name to `GCP_SECRET_TG_PAYMENTS_TOKEN` GitHub variable
-    - Random string for JWT signing secret and save it name to `GCP_SECRET_JWT_SECRET` GitHub variable
-    - PostgreSQL connection string and save it name to `GCP_SECRET_DB_URL` GitHub variable
+    - [Telegram Bot token](#setup-prerequisites) and save the secret name to `GCP_SECRET_TG_BOT_TOKEN` GitHub variable
+    - [Telegram Payments token](#setup-prerequisites) and save the secret name to `GCP_SECRET_TG_PAYMENTS_TOKEN` GitHub variable
+    - Random string for JWT signing secret and save the secret name to `GCP_SECRET_JWT_SECRET` GitHub variable
+    - PostgreSQL connection string and save the secret name to `GCP_SECRET_DB_URL` GitHub variable
       - Connection string format is `postgres://{USER}:{PASSWORD}@/{DATABASE}?host={HOST}`, where:
         - `{USER}` is the name of the user created for Cloud SQL instance above
         - `{PASSWORD}` is the password of the user created for Cloud SQL instance above
         - `{HOST}` is the `/cloudsql/{INSTANCE_CONNECTION_NAME}`, where `{INSTANCE_CONNECTION_NAME}` is the Cloud SQL instance connection name, which is equal to `GCP_SQL_INSTANCE_CONNECTION_NAME`
         - `{DATABASE}` is the name of the database created for Cloud SQL instance above
+    - Cloud Storage connection string and save the secret name to `GCP_SECRET_S3_URL` GitHub variable
+      - Connection string format is `https://{KEY}:{SECRET}@storage.googleapis.com/{BUCKET}`, where:
+        - `{KEY}` is the key of the service account HMAC key created above
+        - `{SECRET}` is the secret of the service account HMAC key created above
+        - `{BUCKET}` is the name of the bucket created in the Cloud Storage above
 0. Define the following GitHub variables:
     - `GCP_SERVICE_MIGRATOR_NAME` with the desired name of Migrator Cloud Run instance 
     - `GCP_SERVICE_UI_NAME` with the desired name of UI Cloud Run instance 
