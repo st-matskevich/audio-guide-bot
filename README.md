@@ -90,7 +90,7 @@ Deployment setup:
         - `{SECRET}` is the secret of the service account HMAC key created above
         - `{BUCKET}` is the name of the bucket created in the Cloud Storage above
 0. Define the following GitHub variables:
-    - `GCP_SERVICE_MIGRATOR_NAME` with the desired name of Migrator Cloud Run instance 
+    - `GCP_SERVICE_MIGRATOR_NAME` with the desired name of DB migration Cloud Run job 
     - `GCP_SERVICE_UI_NAME` with the desired name of UI Cloud Run instance 
     - `GCP_SERVICE_UI_MAX_INSTANCES` with the desired maximum number of UI service instances
     - `GCP_SERVICE_API_NAME` with the desired name of API Cloud Run instance 
