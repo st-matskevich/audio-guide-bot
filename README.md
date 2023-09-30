@@ -87,6 +87,7 @@ curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${BOT_API_
 - [Fiber](https://github.com/gofiber/fiber)
 - [gotgbot](https://github.com/PaulSonOfLars/gotgbot)
 - [minio-go](https://github.com/minio/minio-go)
+- [migrate](https://github.com/golang-migrate/migrate)
 - [s3gw](https://github.com/aquarist-labs/s3gw)
 - [nginx](https://www.nginx.com/)
 - [ngrok](https://ngrok.com/)

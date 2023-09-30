@@ -17,6 +17,26 @@ import (
 func main() {
 	log.Println("Starting API service")
 
+	dbURL := os.Getenv("DB_CONNECTION_STRING")
+	dbProvider, err := db.CreatePostgreSQLDBProvider(dbURL)
+	if err != nil {
+		log.Fatalf("PostgreSQL initialization error: %v", err)
+	}
+	log.Println("PostgreSQL initialized")
+
+	// Apply DB migrations if --migrate is passed
+	args := os.Args[1:]
+	if len(args) > 0 && args[0] == "--migrate" {
+		log.Println("Running in DB migration mode")
+		err = dbProvider.Migrate()
+		if err != nil {
+			log.Fatalf("Migration failed: %v", err)
+		}
+
+		log.Println("Successfully applied DB migrations")
+		os.Exit(0)
+	}
+
 	app := fiber.New()
 
 	// Set logger format to be equal to controller.HandlerPrintf
@@ -32,13 +52,6 @@ func main() {
 		log.Fatalf("Telegram API initialization error: %v", err)
 	}
 	log.Println("Telegram API initialized")
-
-	dbURL := os.Getenv("DB_CONNECTION_STRING")
-	dbProvider, err := db.CreatePostgreSQLDBProvider(dbURL)
-	if err != nil {
-		log.Fatalf("PostgreSQL initialization error: %v", err)
-	}
-	log.Println("PostgreSQL initialized")
 
 	s3URL := os.Getenv("S3_CONNECTION_STRING")
 	blobProvider, err := blob.CreateS3BlobProvider(s3URL)
