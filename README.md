@@ -4,6 +4,8 @@ Telegram bot for taking audio tours. Built on top of [Telegram Mini App Template
 ## Setup prerequisites
 [Telegram Bot](https://core.telegram.org/bots) token is required to interact with [Telegram Bot API](https://core.telegram.org/bots/api). To get one, сreate a bot using [@BotFather](https://t.me/botfather) or follow [Telegram instructions](https://core.telegram.org/bots#how-do-i-create-a-bot).
 
+[Telegram Payments](https://core.telegram.org/bots/payments) token is required to start accepting payments for tickets. To get one, request it from [@BotFather](https://t.me/botfather) or follow [Telegram instructions](https://core.telegram.org/bots/payments#connecting-payments).
+
 ## Local environment
 This repository provides an easy-to-use local development environment. Using it you can start writing your bot business logic without spending time on the environment.
 
@@ -17,6 +19,8 @@ Local environment setup:
 0. Get a [ngrok auth token](https://ngrok.com/docs/secure-tunnels/ngrok-agent/tunnel-authtokens/) and save it to `NGROK_AUTHTOKEN` variable in `.env` file in the project root directory
 0. Claim a [free ngrok domain](https://ngrok.com/blog-post/free-static-domains-ngrok-users) and save it to `NGROK_DOMAIN` variable in `.env` file in the project root directory
 0. Copy [Telegram Bot token](#setup-prerequisites) and save it to `TELEGRAM_BOT_TOKEN` variable in `.env` file in the project root directory
+0. Copy [Telegram Payments token](#setup-prerequisites) and save it to `TELEGRAM_PAYMENTS_TOKEN` variable in `.env` file in the project root directory
+0. Generate random string for JWT secret and save it to `JWT_SECRET` variable in `.env` file in the project root directory
 0. Install [Docker](https://docs.docker.com/get-docker/)
 
 To start or update the environment with the latest code changes, use:
@@ -36,27 +40,30 @@ GCP services used for deployment:
 
 Deployment setup:
 1. [Create a project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project) in GCP
-0. Copy project ID to `GCP_PROJECT_ID` GitHub variable
+0. Copy project ID and save it to `GCP_PROJECT_ID` GitHub variable
 0. [Pick a region](https://cloud.withgoogle.com/region-picker/) for your app and save it to `GCP_PROJECT_REGION` GitHub variable
 0. [Create a service account](https://cloud.google.com/iam/docs/service-accounts-create#creating) with the following rights:
-   - Service Account User (to create resources by the name of this account)
-   - Cloud Run Admin (to create Cloud Run instances)
-   - Artifact Registry Administrator (to manage images in the registry)
-   - Secret Manager Secret Accessor (to access GCP secrets)
+    - Service Account User (to create resources by the name of this account)
+    - Cloud Run Admin (to create Cloud Run instances)
+    - Artifact Registry Administrator (to manage images in the registry)
+    - Secret Manager Secret Accessor (to access GCP secrets)
 0. Copy the service account email and save it to `GCP_SA_EMAIL` GitHub variable
 0. [Export the service account key](https://cloud.google.com/iam/docs/keys-create-delete#creating) and save it to `GCP_SA_KEY` GitHub secret
 0. Enable the following GCP APIs:
-   - Cloud Run Admin API (to create Cloud Run instances)
-   - Secret Manager API (to securely store secrets)
+    - Cloud Run Admin API (to create Cloud Run instances)
+    - Secret Manager API (to securely store secrets)
 0. Create [Artifact Registry for Docker images](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images#create) in `GCP_PROJECT_REGION` region
 0. Copy Artifact Registry name and save it to `GCP_ARTIFACT_REGISTRY` GitHub variable
-0. [Create a secret](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#create) with [Telegram Bot token](#setup-prerequisites) in Secret Manager
-0. Copy the secret name and save it to `GCP_SECRET_TG_TOKEN` GitHub variable
+0. [Create the following secrets](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#create) in Secret Manager:
+    - [Telegram Bot token](#setup-prerequisites) and save it name to `GCP_SECRET_TG_BOT_TOKEN` GitHub variable
+    - [Telegram Payments token](#setup-prerequisites) and save it name to `GCP_SECRET_TG_PAYMENTS_TOKEN` GitHub variable
+    - JWT signing secret and save it name to `GCP_SECRET_JWT_SECRET` GitHub variable
 0. Define the following GitHub variables:
-   - `GCP_SERVICE_UI_NAME` with the desired name of UI Cloud Run instance 
-   - `GCP_SERVICE_UI_MAX_INSTANCES` with the desired maximum number of UI service instances
-   - `GCP_SERVICE_API_NAME` with the desired name of API Cloud Run instance 
-   - `GCP_SERVICE_API_MAX_INSTANCES` with the desired maximum number of API service instances   
+    - `GCP_SERVICE_MIGRATOR_NAME` with the desired name of Migrator Cloud Run instance 
+    - `GCP_SERVICE_UI_NAME` with the desired name of UI Cloud Run instance 
+    - `GCP_SERVICE_UI_MAX_INSTANCES` with the desired maximum number of UI service instances
+    - `GCP_SERVICE_API_NAME` with the desired name of API Cloud Run instance 
+    - `GCP_SERVICE_API_MAX_INSTANCES` with the desired maximum number of API service instances   
 
 After successful deployment, obtain the bot API URL from either `deploy-api` job results or from [GCP Project Console](https://console.cloud.google.com) and proceed to [switching bot environment](#switching-bot-environment).
 
