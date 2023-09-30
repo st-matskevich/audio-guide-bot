@@ -57,6 +57,7 @@ Deployment setup:
     - Cloud Run Admin API (to create Cloud Run instances)
     - Secret Manager API (to securely store secrets)
     - Compute Engine API (to create Cloud SQL instances)
+    - Cloud SQL Admin API (to connect Cloud Run to Cloud SQL)
 0. Create [Artifact Registry for Docker images](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images#create) in `GCP_PROJECT_REGION` region
 0. Copy Artifact Registry name and save it to `GCP_ARTIFACT_REGISTRY` GitHub variable
 0. [Create a PostgreSQL Cloud SQL instance](https://cloud.google.com/sql/docs/postgres/create-instance#create-2nd-gen) in `GCP_PROJECT_REGION` region
@@ -66,7 +67,7 @@ Deployment setup:
       - You can set machine configuration to the minimal one (1 shared vCPU, 0.614 GB RAM)
       - You can set storage type to HDD
       - You can reduce storage size to 10 GB
-0. Copy Cloud SQL instance connection name and save it to `GCP_SQL_INSTANCE_CONNECTION_NAME` GitHub variable
+0. Copy Cloud SQL instance connection name, which can be found on the Overview page for your instance, and save it to `GCP_SQL_INSTANCE_CONNECTION_NAME` GitHub variable
 0. [Create a user](https://cloud.google.com/sql/docs/postgres/create-manage-users#creating) for your Cloud SQL instance
 0. [Create a database](https://cloud.google.com/sql/docs/postgres/create-manage-databases#create) for your Cloud SQL instance
 0. [Create the following secrets](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#create) in Secret Manager:
@@ -74,11 +75,11 @@ Deployment setup:
     - [Telegram Payments token](#setup-prerequisites) and save it name to `GCP_SECRET_TG_PAYMENTS_TOKEN` GitHub variable
     - Random string for JWT signing secret and save it name to `GCP_SECRET_JWT_SECRET` GitHub variable
     - PostgreSQL connection string and save it name to `GCP_SECRET_DB_URL` GitHub variable
-      - Connection string format is `postgres://{USER}:{PASSWORD}@{HOST}/{DATABASE}`, where:
-        - {USER} is the name of the user created for Cloud SQL instance above
-        - {PASSWORD} is the password of the user created for Cloud SQL instance above
-        - {HOST} is the instance connection string for the Cloud SQL instance, you can find it on the Overview page for your instance
-        - {DATABASE} is the name of the database created for Cloud SQL instance above
+      - Connection string format is `postgres://{USER}:{PASSWORD}@/{DATABASE}?host={HOST}`, where:
+        - `{USER}` is the name of the user created for Cloud SQL instance above
+        - `{PASSWORD}` is the password of the user created for Cloud SQL instance above
+        - `{HOST}` is the `/cloudsql/{INSTANCE_CONNECTION_NAME}`, where `{INSTANCE_CONNECTION_NAME}` is the Cloud SQL instance connection name, which is equal to `GCP_SQL_INSTANCE_CONNECTION_NAME`
+        - `{DATABASE}` is the name of the database created for Cloud SQL instance above
 0. Define the following GitHub variables:
     - `GCP_SERVICE_MIGRATOR_NAME` with the desired name of Migrator Cloud Run instance 
     - `GCP_SERVICE_UI_NAME` with the desired name of UI Cloud Run instance 
