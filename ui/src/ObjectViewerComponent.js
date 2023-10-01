@@ -10,11 +10,13 @@ function ObjectViewerComponent(props) {
     const objectCode = props.ObjectCode;
     const accessToken = props.AccessToken;
 
-    const [objectData, setObjectData] = useState({ loaded: false, data: null })
+    const [objectData, setObjectData] = useState({ loaded: false, data: null, error: null })
     useEffect(() => {
-        setObjectData({ loaded: false, data: null });
+        setObjectData({ loaded: false, data: null, error: null });
         getObjectData(accessToken, objectCode).then((response) => {
-            setObjectData({ loaded: true, data: response.data.data });
+            setObjectData({ loaded: true, data: response.data.data, error: null });
+        }).catch((error) => {
+            setObjectData({ loaded: true, data: null, error: error.response.data.data });
         })
     }, [objectCode, accessToken])
 
@@ -25,6 +27,8 @@ function ObjectViewerComponent(props) {
     useEffect(() => {
         const ref = audioRef.current;
         ref.src = audioURL;
+        setAudioPlaying(false);
+        setAudioProgress(0);
 
         return () => {
             ref.pause();
@@ -99,6 +103,14 @@ function ObjectViewerComponent(props) {
     const getUI = () => {
         if (!objectData.loaded) {
             return (<div className="preloader" />)
+        } else if (objectData.error != null) {
+            return (
+                <div className="object-viewer-wrapper">
+                    <span>{"An error occurred while loading object: "}</span>
+                    <span>{objectData.error}</span>
+                    <div className="button" onClick={onScanQRClicked}>Scan QR</div>
+                </div>
+            )
         } else {
             return (
                 <div className="object-viewer-wrapper">

@@ -7,21 +7,21 @@ type Object struct {
 }
 
 type ObjectRepository interface {
-	GetObject(code string) (Object, error)
+	GetObject(code string) (*Object, error)
 }
 
-func (repository *Repository) GetObject(code string) (Object, error) {
+func (repository *Repository) GetObject(code string) (*Object, error) {
 	reader, err := repository.DBProvider.Query("SELECT title, cover_path, audio_path FROM objects WHERE code = $1", code)
 	if err != nil {
-		return Object{}, err
+		return nil, err
 	}
 
 	defer reader.Close()
 	result := Object{}
-	err = reader.GetRow(&result.Title, &result.CoverPath, &result.AudioPath)
-	if err != nil {
-		return Object{}, err
+	found, err := reader.NextRow(&result.Title, &result.CoverPath, &result.AudioPath)
+	if err != nil || !found {
+		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }

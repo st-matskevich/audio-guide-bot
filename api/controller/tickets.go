@@ -28,7 +28,7 @@ func (controller *TicketsController) HandleExchangeTicketForToken(c *fiber.Ctx) 
 	ticketCode, err := uuid.Parse(c.Params("code"))
 	if err != nil {
 		HandlerPrintf(c, "Failed to parse input - %v", err)
-		return HandlerSendError(c, fiber.StatusBadRequest, "Failed to parse input")
+		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse input")
 	}
 
 	active, err := controller.TicketRepository.ActivateTicket(ticketCode.String())

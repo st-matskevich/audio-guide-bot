@@ -14,11 +14,14 @@
 
 .button {
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 5px;
   padding: 10px 25px;
   background-color: var(--tg-theme-button-color);
   color: var(--tg-theme-button-text-color);
   user-select: none;
+  box-sizing: border-box;
+  width: 90%;
+  margin: 15px 8px 8px;
 }
 
 .preloader {
@@ -40,18 +43,15 @@
   }
 }
 
-.scanner-wrapper,
-.no-ticket-wrapper {
+.scanner-wrapper {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
-.scanner-wrapper span,
-.no-ticket-wrapper span {
+.scanner-wrapper span {
   margin: 0 8px;
-}
-
-.scanner-wrapper .button,
-.no-ticket-wrapper .button {
-  margin: 15px 8px 0;
 }
