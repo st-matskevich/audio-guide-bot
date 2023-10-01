@@ -7,6 +7,10 @@
     align-items: center;
 }
 
+.object-viewer-wrapper span {
+    margin: 0 8px;
+}
+
 .object-viewer-wrapper .image-viewer {
     flex: 0 1 auto;
     overflow: hidden;
@@ -60,7 +64,7 @@
     outline: none;
 }
 
-.object-title{
+.object-title {
     font-size: xx-large;
     margin: 10px 0;
 }

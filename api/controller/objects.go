@@ -39,12 +39,12 @@ func (controller *ObjectsController) HandleGetObject(c *fiber.Ctx) error {
 
 	if err != nil {
 		HandlerPrintf(c, "Failed to parse authorization token - %v", err)
-		return HandlerSendError(c, fiber.StatusBadRequest, "Failed to parse authorization token")
+		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse authorization token")
 	}
 
 	if !tokenValid {
 		HandlerPrintf(c, "Authorization token is invalid")
-		return HandlerSendError(c, fiber.StatusUnauthorized, "Authorization token is invalid")
+		return HandlerSendFailure(c, fiber.StatusUnauthorized, "Authorization token is invalid")
 	}
 
 	objectCode := c.Params("code")
@@ -52,6 +52,11 @@ func (controller *ObjectsController) HandleGetObject(c *fiber.Ctx) error {
 	if err != nil {
 		HandlerPrintf(c, "Failed to get object - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
+	}
+
+	if object == nil {
+		HandlerPrintf(c, "Object not found")
+		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
 	}
 
 	return HandlerSendSuccess(c, fiber.StatusOK, object)
@@ -65,12 +70,12 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 
 	if err != nil {
 		HandlerPrintf(c, "Failed to parse authorization token - %v", err)
-		return HandlerSendError(c, fiber.StatusBadRequest, "Failed to parse authorization token")
+		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse authorization token")
 	}
 
 	if !tokenValid {
 		HandlerPrintf(c, "Authorization token is invalid")
-		return HandlerSendError(c, fiber.StatusUnauthorized, "Authorization token is invalid")
+		return HandlerSendFailure(c, fiber.StatusUnauthorized, "Authorization token is invalid")
 	}
 
 	objectCode := c.Params("code")
@@ -80,10 +85,15 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
 	}
 
+	if object == nil {
+		HandlerPrintf(c, "Object not found")
+		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
+	}
+
 	err = controller.BlobProvider.ReadBlob(object.CoverPath, c.Response().BodyWriter())
 	if err != nil {
 		HandlerPrintf(c, "Blob read failed - %v", err)
-		return HandlerSendFailure(c, fiber.StatusInternalServerError, "Blob read failed")
+		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -97,12 +107,12 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 
 	if err != nil {
 		HandlerPrintf(c, "Failed to parse authorization token - %v", err)
-		return HandlerSendError(c, fiber.StatusBadRequest, "Failed to parse authorization token")
+		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse authorization token")
 	}
 
 	if !tokenValid {
 		HandlerPrintf(c, "Authorization token is invalid")
-		return HandlerSendError(c, fiber.StatusUnauthorized, "Authorization token is invalid")
+		return HandlerSendFailure(c, fiber.StatusUnauthorized, "Authorization token is invalid")
 	}
 
 	objectCode := c.Params("code")
@@ -112,10 +122,15 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
 	}
 
+	if object == nil {
+		HandlerPrintf(c, "Object not found")
+		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
+	}
+
 	err = controller.BlobProvider.ReadBlob(object.AudioPath, c.Response().BodyWriter())
 	if err != nil {
 		HandlerPrintf(c, "Blob read failed - %v", err)
-		return HandlerSendFailure(c, fiber.StatusInternalServerError, "Blob read failed")
+		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 	}
 
 	// TODO: Accept-Ranges header allows seeking in the player,

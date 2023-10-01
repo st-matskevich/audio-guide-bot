@@ -63,7 +63,7 @@ function App() {
       return (<div className="preloader" />)
     } else if (tokenState.token == null) {
       return (
-        <div className="no-ticket-wrapper">
+        <div className="scanner-wrapper">
           <span>It seems you haven't purchased a ticket yet.</span>
           <span>To start our tour, please go back to the bot and buy a ticket.</span>
           <div className="button" onClick={onCloseClicked}>Close app</div>
