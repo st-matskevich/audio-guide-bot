@@ -1,5 +1,5 @@
 import jwt_decode from "jwt-decode";
-import { getCloudValue, setCloudValue } from './telegram';
+import { isTelegramAPISupported, getCloudValue, setCloudValue } from './telegram';
 import { exchangeTicketForToken } from './guide';
 
 const TICKET_URL_PARAM = "ticket"
@@ -67,7 +67,9 @@ const getToken = () => {
     })
 }
 
-getToken();
+if(isTelegramAPISupported()) {
+    getToken();
+}
 
 export const addTokenListener = (callback) => {
     if (state.loaded) {
