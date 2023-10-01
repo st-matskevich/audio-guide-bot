@@ -10,11 +10,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type SQLDBReader struct {
+type PostgresDBReader struct {
 	rows *sql.Rows
 }
 
-func (reader *SQLDBReader) NextRow(dest ...interface{}) (bool, error) {
+func (reader *PostgresDBReader) NextRow(dest ...interface{}) (bool, error) {
 	if reader.rows.Next() {
 		err := reader.rows.Scan(dest...)
 		return err == nil, err
@@ -22,7 +22,7 @@ func (reader *SQLDBReader) NextRow(dest ...interface{}) (bool, error) {
 	return false, reader.rows.Err()
 }
 
-func (reader *SQLDBReader) GetRow(dest ...interface{}) error {
+func (reader *PostgresDBReader) GetRow(dest ...interface{}) error {
 	found, err := reader.NextRow(dest...)
 	if !found && err == nil {
 		err = sql.ErrNoRows
@@ -30,22 +30,22 @@ func (reader *SQLDBReader) GetRow(dest ...interface{}) error {
 	return err
 }
 
-func (reader *SQLDBReader) Close() {
+func (reader *PostgresDBReader) Close() {
 	if reader.rows != nil {
 		reader.rows.Close()
 	}
 }
 
-type SQLDBProvider struct {
+type PostgresDBProvider struct {
 	connection *sql.DB
 }
 
-func (provider *SQLDBProvider) Query(query string, args ...interface{}) (DBReader, error) {
+func (provider *PostgresDBProvider) Query(query string, args ...interface{}) (DBReader, error) {
 	response, err := provider.connection.Query(query, args...)
-	return &SQLDBReader{rows: response}, err
+	return &PostgresDBReader{rows: response}, err
 }
 
-func (provider *SQLDBProvider) Exec(query string, args ...interface{}) (int64, error) {
+func (provider *PostgresDBProvider) Exec(query string, args ...interface{}) (int64, error) {
 	result, err := provider.connection.Exec(query, args...)
 	if err != nil {
 		return 0, err
@@ -59,14 +59,14 @@ func (provider *SQLDBProvider) Exec(query string, args ...interface{}) (int64, e
 	return rows, nil
 }
 
-func (provider *SQLDBProvider) Migrate() error {
+func (provider *PostgresDBProvider) Migrate() error {
 	driver, err := postgres.WithInstance(provider.connection, &postgres.Config{})
 	if err != nil {
 		return err
 	}
 
 	migrator, err := migrate.NewWithDatabaseInstance(
-		"file:///migrations",
+		"file:///migrations/postgres",
 		"postgres", driver)
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (provider *SQLDBProvider) Migrate() error {
 	return nil
 }
 
-func CreatePostgreSQLDBProvider(URL string) (DBProvider, error) {
+func CreatePostgresDBProvider(URL string) (DBProvider, error) {
 	db, err := sql.Open("postgres", URL)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func CreatePostgreSQLDBProvider(URL string) (DBProvider, error) {
 		return nil, err
 	}
 
-	provider := SQLDBProvider{
+	provider := PostgresDBProvider{
 		connection: db,
 	}
 

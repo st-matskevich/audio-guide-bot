@@ -14,10 +14,10 @@ QR codes for the bot can be found in [/admin/test-data](/admin/test-data).
 - [Continious deliviery](#production-deployment) to [Google Cloud Platform](https://cloud.google.com/) - all changes to the `main` branch are automatically delivered to the production
 
 ## Usage
-- Complete [setup prerequisites](#setup-prerequisites)
-- [Start the bot locally](#local-environment) or [deploy it to the production](#production-deployment)
-- [Enter data about your objects](#administration)
-- Message your bot, buy a ticket, scan the code, and start listening
+1. Complete [setup prerequisites](#setup-prerequisites)
+0. [Start the bot locally](#local-environment) or [deploy it to the production](#production-deployment)
+0. [Enter data about your objects](#administration)
+0. Message your bot, buy a ticket, scan the code, and start listening
 
 ## Setup prerequisites
 [Telegram Bot](https://core.telegram.org/bots) token is required to interact with [Telegram Bot API](https://core.telegram.org/bots/api). To get one, сreate a bot using [@BotFather](https://t.me/botfather) or follow [Telegram bot instructions](https://core.telegram.org/bots#how-do-i-create-a-bot).
@@ -127,31 +127,28 @@ In the case of [local environment](#local-environment), [pgAdmin](https://github
 In case of [production deployment](#production-deployment), S3 management is available from [GCP Project Console](https://console.cloud.google.com), but for DB management you need to setup an instance of [pgAdmin](https://github.com/pgadmin-org/pgadmin4) with [cloud-sql-proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) to connect to your Cloud SQL instance. Instructions are available in [/admin](/admin).
 
 To create an object in the Guide Bot you need:
-- Prepare the data
-  - **Title**: string which will be displayed as a title of the object. It must not exceed 64 characters
-  - **Code**: string that will be encoded in a QR code to access your object
-  - **Cover**: image file that will be displayed while listening to the Guide. It can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
-  - **Audio**: audio file which which will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
-- Upload **Cover** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files.
-- Connect to the DB and create a new row in the `objects` table using DB management tool
-  - Set `code` to the value of  **Code**
-  - Set `title` to the value of  **Title**
-  - Set `cover` to the path of the uploaded file **Cover**
-  - Set `audio` to the path of the uploaded file **Audio**
-- Encode **Code** to the QR Code to access your object from the Guide Bot 
+1. Prepare the data
+    - **Title**: string which will be displayed as a title of the object. It must not exceed 64 characters
+    - **Code**: string that will be encoded in a QR code to access your object
+    - **Cover**: image file that will be displayed while listening to the Guide. It can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
+    - **Audio**: audio file which which will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
+0. Upload **Cover** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files.
+0. Connect to the DB and create a new row in the `objects` table using DB management tool
+    - Set `code` to the value of  **Code**
+    - Set `title` to the value of  **Title**
+    - Set `cover` to the path of the uploaded file **Cover**
+    - Set `audio` to the path of the uploaded file **Audio**
+0. Encode **Code** to the QR Code to access your object from the Guide Bot 
+
+For testing purposes you also can use files from [/admin/test-data](/admin/test-data).
 
 ## Project structure
 - Project root directory - contains files for [local environment](#local-environment)
   - [docker-compose.yml](docker-compose.yml) - docker-compose file to setup  [local environment](#local-environment)
   - [proxy.template](proxy.template) - nginx config template to route ngrok domain to API and UI containers
-- [api](/api/) - contains files for the bot backend written in Go
-  - [Dockerfile](/api/Dockerfile) - docker file for the API service image
-  - Other files - minimal Go package layout with HTTP endpoint to handle [Telegram Bot API](https://core.telegram.org/bots/api) calls
-- [ui](/ui/) - contains files for the mini app UI written in JS with React
-  - [dev.dockerfile](/ui/dev.dockerfile) - docker file for the [local environment](#local-environment) to track code changes and updated served UI bundle
-  - [prod.dockerfile](/ui/prod.dockerfile) - docker file for the [production deployment](#production-deployment) to bundle UI and serve via nginx
-  - [nginx.template](/ui/nginx.template) - nginx config template for production UI service image
-  - Other files - React template with minimal changes for the integration with Telegram
+- [api](/api) - contains files for the bot backend written in Go, check the [README](/api) file for details
+- [ui](/ui) - contains files for the mini app UI written in JS with React, check the [README](/ui) file for details
+- [admin](/admin) - contains files for production administration environment, check the [README](/admin) file for details
 
 ## Built with
 - [Docker](https://www.docker.com/)

@@ -19,7 +19,7 @@ func main() {
 	log.Println("Starting API service")
 
 	dbURL := os.Getenv("DB_CONNECTION_STRING")
-	dbProvider, err := db.CreatePostgreSQLDBProvider(dbURL)
+	dbProvider, err := db.CreatePostgresDBProvider(dbURL)
 	if err != nil {
 		log.Fatalf("PostgreSQL initialization error: %v", err)
 	}
