@@ -143,7 +143,7 @@ type BotMessage struct {
 }
 
 func (controller *BotController) buildWelcomeMessage() BotMessage {
-	message := "Let's start the tour!🎧\nPlease tap the button below to proceed"
+	message := "Let's start the tour!🎧\nPlease choose an option below to proceed"
 	opts := &gotgbot.SendMessageOpts{
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
 			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
