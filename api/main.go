@@ -6,6 +6,7 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/st-matskevich/audio-guide-bot/api/auth"
 	"github.com/st-matskevich/audio-guide-bot/api/blob"
@@ -38,6 +39,15 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	// Setup CORS if CORS_ALLOWED_ORIGINS is provided
+	corsOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if corsOrigins != "" {
+		log.Printf("Setting CORS Allowed Origins to %s", corsOrigins)
+		app.Use(cors.New(cors.Config{
+			AllowOrigins: corsOrigins,
+		}))
+	}
 
 	// Set logger format to be equal to controller.HandlerPrintf
 	app.Use(logger.New(logger.Config{

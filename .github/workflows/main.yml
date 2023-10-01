@@ -233,4 +233,5 @@ jobs:
           gcloud --quiet run services update ${{ env.API_SERVICE }} \
           --region=${{ env.PROJECT_REGION }} \
           --service-account=${{ env.SERVICE_ACCOUNT }} \
-          --update-env-vars=TELEGRAM_WEB_APP_URL=${{ env.UI_URL }}
+          --update-env-vars=TELEGRAM_WEB_APP_URL=${{ env.UI_URL }} \
+          --update-env-vars=CORS_ALLOWED_ORIGINS=${{ env.UI_URL }}
