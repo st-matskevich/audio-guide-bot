@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  postgres-admin:
+    image: dpage/pgadmin4
+    volumes:
+      - admin-pg-admin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: on-failure
+    ports:
+      - 9100:80
+
+  cloud-sql-proxy:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
+    volumes:
+      - ./sa-key.json:/config
+    command: "--address 0.0.0.0 --port 5432 ${INSTANCE_CONNECTION_NAME} --credentials-file=/config"
+
+volumes:
+  admin-pg-admin:

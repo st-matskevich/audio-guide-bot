@@ -1,5 +1,9 @@
 # Audio Guide Bot
-Telegram bot for taking audio tours. Built on top of [Telegram Mini App Template](https://github.com/st-matskevich/tg-mini-app-template). Available at [@audio_guide_bot](https://t.me/audio_guide_bot).
+Telegram bot for taking audio tours. Built on top of [Telegram Mini App Template](https://github.com/st-matskevich/tg-mini-app-template). 
+
+Bot is available at [@audio_guide_bot](https://t.me/audio_guide_bot).  
+Bot payments are running in test mode. Transactions need to be completed using test cards like `4242 4242 4242 4242`, other cards can be found in [payments provider docs](https://guide.tranzzo.com/docs/testing/cards/).  
+QR codes for bot can be found in [/admin/test-data](/admin/test-data).
 
 ## Setup prerequisites
 [Telegram Bot](https://core.telegram.org/bots) token is required to interact with [Telegram Bot API](https://core.telegram.org/bots/api). To get one, сreate a bot using [@BotFather](https://t.me/botfather) or follow [Telegram instructions](https://core.telegram.org/bots#how-do-i-create-a-bot).
