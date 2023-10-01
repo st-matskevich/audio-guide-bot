@@ -31,7 +31,7 @@ services:
     image: migrate/migrate
     command: -path=/migrations/ -database postgres://guide:guide@postgres-db:5432/guide-system?sslmode=disable up 
     volumes:
-      - ./api/db/migrations:/migrations
+      - ./api/db/migrations/postgres:/migrations
     restart: on-failure
 
   # UI for PostgreSQL DB
