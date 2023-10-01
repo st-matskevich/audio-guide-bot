@@ -1,14 +1,28 @@
 # Audio Guide Bot
-Telegram bot for taking audio tours. Built on top of [Telegram Mini App Template](https://github.com/st-matskevich/tg-mini-app-template). 
+Telegram bot for taking audio tours, built on top of [Telegram Mini App Template](https://github.com/st-matskevich/tg-mini-app-template). 
 
 Bot is available at [@audio_guide_bot](https://t.me/audio_guide_bot).  
 Bot payments are running in test mode. Transactions need to be completed using test cards like `4242 4242 4242 4242`, other cards can be found in [payments provider docs](https://guide.tranzzo.com/docs/testing/cards/).  
-QR codes for bot can be found in [/admin/test-data](/admin/test-data).
+QR codes for the bot can be found in [/admin/test-data](/admin/test-data).
+
+## Features
+- Integration with [Telegram Payments](https://core.telegram.org/bots/payments) - Guide Bot tickets can be bought directly in Telegram
+- Integration with [Telegram CloudStorage](https://core.telegram.org/bots/webapps#cloudstorage) - after activation, the user's ticket is available to all user devices
+- UI delivered as [Telegram Mini App](https://core.telegram.org/bots/webapps) - no need for a standalone application, Guide Bot is available as a part of Telegram bot
+- Adaptive UI - Guide Bot will automatically pick up the user's color theme and adapt the size to both expanded and minimized modes
+- [Local environment](#local-environment) with [docker-compose](https://docs.docker.com/compose/)- spin-up bot environment locally in one command
+- [Continious deliviery](#production-deployment) to [Google Cloud Platform](https://cloud.google.com/) - all changes to the `main` branch are automatically delivered to the production
+
+## Usage
+- Complete [setup prerequisites](#setup-prerequisites)
+- [Start the bot locally](#local-environment) or [deploy it to the production](#production-deployment)
+- [Enter data about your objects](#administration)
+- Message your bot, buy a ticket, scan the code, and start listening
 
 ## Setup prerequisites
-[Telegram Bot](https://core.telegram.org/bots) token is required to interact with [Telegram Bot API](https://core.telegram.org/bots/api). To get one, сreate a bot using [@BotFather](https://t.me/botfather) or follow [Telegram instructions](https://core.telegram.org/bots#how-do-i-create-a-bot).
+[Telegram Bot](https://core.telegram.org/bots) token is required to interact with [Telegram Bot API](https://core.telegram.org/bots/api). To get one, сreate a bot using [@BotFather](https://t.me/botfather) or follow [Telegram bot instructions](https://core.telegram.org/bots#how-do-i-create-a-bot).
 
-[Telegram Payments](https://core.telegram.org/bots/payments) token is required to start accepting payments for tickets. To get one, request it from [@BotFather](https://t.me/botfather) or follow [Telegram instructions](https://core.telegram.org/bots/payments#connecting-payments).
+[Telegram Payments](https://core.telegram.org/bots/payments) token is required to start accepting payments for tickets. To get one, request it from [@BotFather](https://t.me/botfather) or follow [Telegram payments instructions](https://core.telegram.org/bots/payments#connecting-payments).
 
 ## Local environment
 This repository provides an easy-to-use local development environment. Using it you can start writing your bot business logic without spending time on the environment.
@@ -43,7 +57,7 @@ GCP services used for deployment:
 - [Cloud Run](https://cloud.google.com/run) to host dockerized API and UI code
 - [Artifact Registry](https://cloud.google.com/artifact-registry) to store docker images
 - [Secret Manager](https://cloud.google.com/secret-manager) to store sensitive data
-- [Cloud SQL](https://cloud.google.com/sql) to host relational database
+- [Cloud SQL](https://cloud.google.com/sql) to host a relational database
 - [Cloud Storage](https://cloud.google.com/storage) to store binary data
 
 Deployment setup:
@@ -70,8 +84,8 @@ Deployment setup:
     - If you want to reduce the cost of the instance:
       - You can implement [instance scheduler](https://cloud.google.com/blog/topics/developers-practitioners/lower-development-costs-schedule-cloud-sql-instances-start-and-stop)
       - You can set "Zonal availability" to "Single zone" instead of "Multiple zones (Highly available)"
-      - You can set machine configuration to the minimal one (1 shared vCPU, 0.614 GB RAM)
-      - You can set storage type to HDD
+      - You can set the machine configuration to the minimal one (1 shared vCPU, 0.614 GB RAM)
+      - You can set the storage type to HDD
       - You can reduce storage size to 10 GB
 0. Copy Cloud SQL instance connection name, which can be found on the Overview page for your instance, and save it to `GCP_SQL_INSTANCE_CONNECTION_NAME` GitHub variable
 0. [Create a user](https://cloud.google.com/sql/docs/postgres/create-manage-users#creating) for your Cloud SQL instance
@@ -100,13 +114,31 @@ Deployment setup:
     - `GCP_SERVICE_API_NAME` with the desired name of API Cloud Run instance 
     - `GCP_SERVICE_API_MAX_INSTANCES` with the desired maximum number of API service instances   
 
-After successful deployment, obtain the bot API URL from either `deploy-api` job results or from [GCP Project Console](https://console.cloud.google.com) and proceed to [switching bot environment](#switching-bot-environment).
+After successful deployment, obtain the bot API URL from either `deploy-services` job results or from [GCP Project Console](https://console.cloud.google.com) and proceed to [switching bot environment](#switching-bot-environment).
 
 ## Switching bot environment
 After the bot is either [launched locally](#local-environment) or [deployed in GCP](#production-deployment), Telegram needs to be configured with a proper webhook URL. To set it, use:
 ```sh
 curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${BOT_API_URL}/bot
 ```
+
+## Administration
+In the case of [local environment](#local-environment), [pgAdmin](https://github.com/pgadmin-org/pgadmin4) for DB management and [s3gw-ui](https://github.com/aquarist-labs/s3gw-ui) for S3 management are already running as containers. Discover their addresses in your [docker daemon](https://docs.docker.com/engine/reference/commandline/ps/).  
+In case of [production deployment](#production-deployment), S3 management is available from [GCP Project Console](https://console.cloud.google.com), but for DB management you need to setup an instance of [pgAdmin](https://github.com/pgadmin-org/pgadmin4) with [cloud-sql-proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) to connect to your Cloud SQL instance. Instructions are available in [/admin](/admin).
+
+To create an object in the Guide Bot you need:
+- Prepare the data
+  - **Title**: string which will be displayed as a title of the object. It must not exceed 64 characters
+  - **Code**: string that will be encoded in a QR code to access your object
+  - **Cover**: image file that will be displayed while listening to the Guide. It can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
+  - **Audio**: audio file which which will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
+- Upload **Cover** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files.
+- Connect to the DB and create a new row in the `objects` table using DB management tool
+  - Set `code` to the value of  **Code**
+  - Set `title` to the value of  **Title**
+  - Set `cover` to the path of the uploaded file **Cover**
+  - Set `audio` to the path of the uploaded file **Audio**
+- Encode **Code** to the QR Code to access your object from the Guide Bot 
 
 ## Project structure
 - Project root directory - contains files for [local environment](#local-environment)
