@@ -1,0 +1,28 @@
+.marquee-container {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+}
+
+.marquee-content {
+    animation-duration: 24s;
+    animation-name: marquee;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    white-space: nowrap;
+}
+
+.marquee-content.inactive {
+    animation: none;
+    margin: auto;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(100vw);
+    }
+
+    to {
+        transform: translateX(-100%)
+    }
+}

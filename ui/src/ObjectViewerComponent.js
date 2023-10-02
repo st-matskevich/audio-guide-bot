@@ -1,5 +1,6 @@
 import './ObjectViewerComponent.css';
 import ReactSlider from "react-slider";
+import MarqueeComponent from './MarqueeComponent';
 import { ReactComponent as PlayIcon } from './assets/play.svg'
 import { ReactComponent as PauseIcon } from './assets/pause.svg'
 import { ReactComponent as QRIcon } from './assets/qr-code.svg'
@@ -117,7 +118,7 @@ function ObjectViewerComponent(props) {
                     <div className="image-viewer">
                         <img src={coverURL} alt="cover" />
                     </div>
-                    <div className="object-title">{objectData.data.title}</div>
+                    <MarqueeComponent className="object-title" string={objectData.data.title} />
                     <ReactSlider className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
                     <div className="controls-bar">
                         <div className="icon-button" onClick={onScanQRClicked}>
