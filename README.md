@@ -159,6 +159,8 @@ For testing purposes you also can use files from [/admin/test-data](/admin/test-
 - [gotgbot](https://github.com/PaulSonOfLars/gotgbot)
 - [minio-go](https://github.com/minio/minio-go)
 - [migrate](https://github.com/golang-migrate/migrate)
+- [jwt-go](https://github.com/golang-jwt/jwt)
+- [axios](https://github.com/axios/axios)
 - [s3gw](https://github.com/aquarist-labs/s3gw)
 - [s3gw-ui](https://github.com/aquarist-labs/s3gw-ui)
 - [pgAdmin](https://github.com/pgadmin-org/pgadmin4)

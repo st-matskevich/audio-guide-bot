@@ -28,40 +28,10 @@
     flex-direction: row;
 }
 
-.controls-bar .icon-button {
-    width: 55px;
-    height: 55px;
-    background-color: var(--tg-theme-button-color);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10px 25px;
-}
-
 .audio-range {
     width: 80%;
     height: 16px;
     margin: 5px 10px;
-}
-
-.audio-range .track {
-    top: 7px;
-    height: 2px;
-    background: var(--tg-theme-hint-color);
-}
-
-.audio-range .track.track-0 {
-    background: var(--tg-theme-button-color);
-}
-
-.audio-range .thumb {
-    cursor: pointer;
-    background: var(--tg-theme-button-color);
-    width: 16px;
-    height: 16px;
-    border-radius: 100%;
-    outline: none;
 }
 
 .object-title {
