@@ -7,6 +7,7 @@ import { ReactComponent as QRIcon } from '../assets/qr-code.svg';
 import { useRef, useState, useEffect } from "react";
 import { getObjectAudioURL, getObjectCoverURL, getObjectData } from '../api/guide';
 import SliderComponent from './SliderComponent';
+import RippleContainer from './RippleContainer';
 
 function ObjectViewerComponent(props) {
     const { accessToken, objectCode } = props;
@@ -109,7 +110,7 @@ function ObjectViewerComponent(props) {
                 <div className="object-viewer-wrapper">
                     <span>{"An error occurred while loading object: "}</span>
                     <span>{objectData.error}</span>
-                    <div className="button" onClick={onScanQRClicked}>Scan QR</div>
+                    <RippleContainer className="button" onClick={onScanQRClicked}>Scan QR</RippleContainer>
                 </div>
             )
         } else {
@@ -121,7 +122,7 @@ function ObjectViewerComponent(props) {
                     <MarqueeComponent className="object-title" string={objectData.data.title} />
                     <SliderComponent className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
                     <div className="controls-bar">
-                        <div className="icon-button" onClick={onScanQRClicked}>
+                        <RippleContainer className="icon-button" onClick={onScanQRClicked}>
                             <QRIcon
                                 width="31"
                                 height="31"
@@ -129,10 +130,10 @@ function ObjectViewerComponent(props) {
                                 stroke="var(--tg-theme-button-text-color)"
                                 alt="scan qr code"
                             />
-                        </div>
-                        <div className="icon-button" onClick={toggleAudioPlay}>
+                        </RippleContainer>
+                        <RippleContainer className="icon-button" onClick={toggleAudioPlay}>
                             {getPlayIcon()}
-                        </div>
+                        </RippleContainer>
                     </div>
                 </div>
             )

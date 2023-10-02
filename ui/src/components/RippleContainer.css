@@ -1,0 +1,22 @@
+.ripple-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-container span {
+    --duration: 1000ms;
+    transform: scale(0);
+    border-radius: 100%;
+    position: absolute;
+    opacity: 0.25;
+    background-color: var(--tg-theme-button-text-color);
+    animation-name: ripple;
+    animation-duration: var(--duration);
+}
+
+@keyframes ripple {
+    to {
+        opacity: 0;
+        transform: scale(4);
+    }
+}

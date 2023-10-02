@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { addTokenListener, removeTokenListener } from './api/auth';
 import ObjectViewerComponent from './components/ObjectViewerComponent'
 import { isTelegramAPISupported } from './api/telegram';
+import RippleContainer from './components/RippleContainer';
 
 function App() {
   const isSupported = isTelegramAPISupported();
@@ -67,7 +68,7 @@ function App() {
         <div className="scanner-wrapper">
           <span>Your Telegram version is not supported.</span>
           <span>Please update to the latest one.</span>
-          <div className="button" onClick={onCloseClicked}>Close app</div>
+          <RippleContainer className="button" onClick={onCloseClicked}>Close app</RippleContainer>
         </div>
       )
     }
@@ -78,7 +79,7 @@ function App() {
         <div className="scanner-wrapper">
           <span>It seems you haven't purchased a ticket yet.</span>
           <span>To start our tour, please go back to the bot and buy a ticket.</span>
-          <div className="button" onClick={onCloseClicked}>Close app</div>
+          <RippleContainer className="button" onClick={onCloseClicked}>Close app</RippleContainer>
         </div>
       )
     } else if (scannedObject == null) {
@@ -86,7 +87,7 @@ function App() {
         <div className="scanner-wrapper">
           <span>Welcome to the tour!</span>
           <span>Scan QR codes to start listening.</span>
-          <div className="button" onClick={onScanQRClicked}>Scan QR</div>
+          <RippleContainer className="button" onClick={onScanQRClicked}>Scan QR</RippleContainer>
         </div>
       )
     } else {
