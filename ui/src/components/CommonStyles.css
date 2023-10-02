@@ -1,0 +1,41 @@
+.button {
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 10px 25px;
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    user-select: none;
+    box-sizing: border-box;
+    width: 90%;
+    margin: 15px 8px 8px;
+}
+
+.icon-button {
+    width: 55px;
+    height: 55px;
+    background-color: var(--tg-theme-button-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 25px;
+}
+
+.preloader {
+    border: 8px solid var(--tg-theme-secondary-bg-color);
+    border-top: 8px solid var(--tg-theme-hint-color);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

@@ -1,15 +1,15 @@
 import './ObjectViewerComponent.css';
-import ReactSlider from "react-slider";
+import './CommonStyles.css';
 import MarqueeComponent from './MarqueeComponent';
-import { ReactComponent as PlayIcon } from './assets/play.svg'
-import { ReactComponent as PauseIcon } from './assets/pause.svg'
-import { ReactComponent as QRIcon } from './assets/qr-code.svg'
-import { useRef, useState, useEffect } from "react"
-import { getObjectAudioURL, getObjectCoverURL, getObjectData } from './api/guide';
+import { ReactComponent as PlayIcon } from '../assets/play.svg';
+import { ReactComponent as PauseIcon } from '../assets/pause.svg';
+import { ReactComponent as QRIcon } from '../assets/qr-code.svg';
+import { useRef, useState, useEffect } from "react";
+import { getObjectAudioURL, getObjectCoverURL, getObjectData } from '../api/guide';
+import SliderComponent from './SliderComponent';
 
 function ObjectViewerComponent(props) {
-    const objectCode = props.ObjectCode;
-    const accessToken = props.AccessToken;
+    const { accessToken, objectCode } = props;
 
     const [objectData, setObjectData] = useState({ loaded: false, data: null, error: null })
     useEffect(() => {
@@ -119,7 +119,7 @@ function ObjectViewerComponent(props) {
                         <img src={coverURL} alt="cover" />
                     </div>
                     <MarqueeComponent className="object-title" string={objectData.data.title} />
-                    <ReactSlider className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
+                    <SliderComponent className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
                     <div className="controls-bar">
                         <div className="icon-button" onClick={onScanQRClicked}>
                             <QRIcon

@@ -1,7 +1,8 @@
 import './App.css';
+import './components/CommonStyles.css'
 import { useEffect, useState } from "react"
 import { addTokenListener, removeTokenListener } from './api/auth';
-import ObjectViewerComponent from './ObjectViewerComponent'
+import ObjectViewerComponent from './components/ObjectViewerComponent'
 import { isTelegramAPISupported } from './api/telegram';
 
 function App() {
@@ -89,7 +90,7 @@ function App() {
         </div>
       )
     } else {
-      return <ObjectViewerComponent AccessToken={tokenState.token} ObjectCode={scannedObject} />
+      return <ObjectViewerComponent accessToken={tokenState.token} objectCode={scannedObject} />
     }
   }
 

@@ -12,7 +12,9 @@ Required environment variables:
 ## React app structure
 Components are used to build UI:
 - [App.js](./src/App.js) - entry component, used to handle authentication flow, interact with Telegram's API and show the initial interface
-- [ObjectViewerComponent.js](./src/ObjectViewerComponent.js) - component that handles object viewing, loads object metadata, and if it exists - shows cover image and loads audio
+- [ObjectViewerComponent.js](./src/components/ObjectViewerComponent.js) - component that handles object viewing, loads object metadata, and if it exists - shows cover image and loads audio
+- [MarqueeComponent.js](./src/components/MarqueeComponent.js) - replacement for an obsolete [\<marquee>](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee) HTML element
+- [SliderComponent.js](./src/components/SliderComponent.js) - range input element with custom styling
 
 Helpers are used to decouple and isolate APIs from React:
 - [auth.js](./src/api/auth.js) - implements token storage and refresh logic
