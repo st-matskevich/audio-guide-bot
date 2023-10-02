@@ -1,5 +1,4 @@
 .button {
-    cursor: pointer;
     border-radius: 5px;
     padding: 10px 25px;
     background-color: var(--tg-theme-button-color);
@@ -8,6 +7,8 @@
     box-sizing: border-box;
     width: 90%;
     margin: 15px 8px 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .icon-button {
@@ -19,6 +20,8 @@
     justify-content: center;
     align-items: center;
     margin: 10px 25px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .preloader {
