@@ -1,8 +1,8 @@
 import "./SliderComponent.css";
+import { useState } from "react";
 
 function SliderComponent(props) {
     const {className, value, min, max, step, onChange} = props;
-
 
     const handleChange = (e) => {
         const newValue = parseFloat(e.target.value, 10);
@@ -11,11 +11,20 @@ function SliderComponent(props) {
         }
     };
 
+    const [hover, setHover] = useState(false);
+    const onTouchStart = (e) => {
+        setHover(true)
+    }
+
+    const onTouchEnd = (e) => {
+        setHover(false)
+    }
+
     const progress = ((value - min) / (max - min)) * 100;
 
     return (
         <input
-            className={`range-input ${className}`}
+            className={`range-input ${className} ${hover ? "active" : ""}`}
             style={{ "--progress": `${progress}%` }}
             type="range"
             min={min}
@@ -23,6 +32,10 @@ function SliderComponent(props) {
             step={step}
             value={value}
             onChange={handleChange}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            onMouseEnter={onTouchStart}
+            onMouseLeave={onTouchEnd}
         />
     );
 }

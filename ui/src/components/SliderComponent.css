@@ -2,11 +2,12 @@
     --progress: 0;
     -webkit-appearance: none;
     appearance: none;
-    cursor: pointer;
     outline: none;
     height: 2px;
     margin: 13px 10px;
     background: linear-gradient(to right, var(--tg-theme-button-color) var(--progress), var(--tg-theme-hint-color) var(--progress));
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .range-input::-webkit-slider-thumb {
@@ -17,6 +18,7 @@
     background-color: var(--tg-theme-button-color);
     border-radius: 50%;
     border: none;
+    transition: transform .3s;
 }
 
 .range-input::-moz-range-thumb {
@@ -25,4 +27,13 @@
     background-color: var(--tg-theme-button-color);
     border-radius: 50%;
     border: none;
+    transition: transform .3s;
+}
+
+.range-input.active::-webkit-slider-thumb {
+    transform: scale(1.25);
+}
+
+.range-input.active::-moz-range-thumb {
+    transform: scale(1.25);
 }
