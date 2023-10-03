@@ -8,6 +8,7 @@ import { useRef, useState, useEffect } from "react";
 import { getObjectAudioURL, getObjectCoverURL, getObjectData } from '../api/guide';
 import SliderComponent from './SliderComponent';
 import RippleContainer from './RippleContainer';
+import ImageComponent from './ImageComponent';
 
 function ObjectViewerComponent(props) {
     const { accessToken, objectCode } = props;
@@ -117,7 +118,7 @@ function ObjectViewerComponent(props) {
             return (
                 <div className="object-viewer-wrapper">
                     <div className="image-viewer">
-                        <img src={coverURL} alt="cover" />
+                        <ImageComponent src={coverURL} alt="cover" />
                     </div>
                     <MarqueeComponent className="object-title" string={objectData.data.title} />
                     <SliderComponent className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />

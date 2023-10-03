@@ -88,7 +88,7 @@ Deployment setup:
       - You can set the machine configuration to the minimal one (1 shared vCPU, 0.614 GB RAM)
       - You can set the storage type to HDD
       - You can reduce storage size to 10 GB
-0. Copy Cloud SQL instance connection name, which can be found on the Overview page for your instance, and save it to `GCP_SQL_INSTANCE_CONNECTION_NAME` GitHub variable
+0. Copy Cloud SQL instance connection name, that can be found on the Overview page for your instance, and save it to `GCP_SQL_INSTANCE_CONNECTION_NAME` GitHub variable
 0. [Create a user](https://cloud.google.com/sql/docs/postgres/create-manage-users#creating) for your Cloud SQL instance
 0. [Create a database](https://cloud.google.com/sql/docs/postgres/create-manage-databases#create) for your Cloud SQL instance
 0. [Create a Cloud Storage bucket](https://cloud.google.com/storage/docs/creating-buckets#create_a_new_bucket) in `GCP_PROJECT_REGION` region
@@ -101,7 +101,7 @@ Deployment setup:
       - Connection string format is `postgres://{USER}:{PASSWORD}@/{DATABASE}?host={HOST}`, where:
         - `{USER}` is the name of the user created for Cloud SQL instance above
         - `{PASSWORD}` is the password of the user created for Cloud SQL instance above
-        - `{HOST}` is the `/cloudsql/{INSTANCE_CONNECTION_NAME}`, where `{INSTANCE_CONNECTION_NAME}` is the Cloud SQL instance connection name, which is equal to `GCP_SQL_INSTANCE_CONNECTION_NAME`
+        - `{HOST}` is the `/cloudsql/{INSTANCE_CONNECTION_NAME}`, where `{INSTANCE_CONNECTION_NAME}` is the Cloud SQL instance connection name, that is equal to `GCP_SQL_INSTANCE_CONNECTION_NAME`
         - `{DATABASE}` is the name of the database created for Cloud SQL instance above
     - Cloud Storage connection string and save the secret name to `GCP_SECRET_S3_URL` GitHub variable
       - Connection string format is `https://{KEY}:{SECRET}@storage.googleapis.com/{BUCKET}`, where:
@@ -129,10 +129,10 @@ In case of [production deployment](#production-deployment), S3 management is ava
 
 To create an object in the Guide Bot you need:
 1. Prepare the data
-    - **Title**: string which will be displayed as a title of the object. It must not exceed 64 characters
+    - **Title**: string that will be displayed as a title of the object. It must not exceed 64 characters
     - **Code**: string that will be encoded in a QR code to access your object
     - **Cover**: image file that will be displayed while listening to the Guide. It can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
-    - **Audio**: audio file which which will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
+    - **Audio**: audio file that will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
 0. Upload **Cover** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files.
 0. Connect to the DB and create a new row in the `objects` table using DB management tool
     - Set `code` to the value of  **Code**
