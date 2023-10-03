@@ -143,6 +143,30 @@ To create an object in the Guide Bot you need:
 
 For testing purposes you also can use files from [/admin/test-data](/admin/test-data).
 
+## Project overview
+Project is built of 4 parts:
+- API Service - implements integration with Telegram API and Guide business logic
+- UI Service - user interface in the format of Telegram MiniApp 
+- Database - stores entity data such as tickets or objects
+- Blob storage - stores binary files such as object images or audio tracks
+
+Project design:
+- Base project entity is called Object - any point of interest that will be available in the system
+- All objects include:
+  - Title - name of the object
+  - Code - unique text data that is used for object identification
+  - Cover - image associated with the object
+  - Audio - audio track associated with the object
+- Access to the objects is provided by scanning QR codes with encoded object code
+- Access to the objects is limited by token-based authorization
+- Token validity is limited by the expiration date
+- Token must be persisted until it becomes invalid
+- Token can be acquired by activating a separate entity - Ticket
+- Ticket includes:
+  - Code - unique text data that is used for ticket identification
+  - Activation flag - once set to true, cannot be activated anymore
+- Ticket can be bought via Telegram Payments
+
 ## Project structure
 - Project root directory - contains files for [local environment](#local-environment)
   - [docker-compose.yml](docker-compose.yml) - docker-compose file to setup  [local environment](#local-environment)
