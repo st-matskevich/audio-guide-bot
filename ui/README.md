@@ -17,6 +17,7 @@ Components are used to build UI:
 - [SliderComponent.js](./src/components/SliderComponent.js) - range input element with custom styling
 - [RippleContainer.js](./src/components/RippleContainer.js) - container that adds visual 'ripple' effect on click
 - [ImageComponent.js](./src/components/ImageComponent.js) - component that will show image only after it's loaded
+- [CarouselContainer.js](./src/components/CarouselContainer.js) - container that allows to switch between object covers
 
 Helpers are used to decouple and isolate APIs from React:
 - [auth.js](./src/api/auth.js) - implements token storage and refresh logic

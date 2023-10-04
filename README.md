@@ -131,14 +131,17 @@ To create an object in the Guide Bot you need:
 1. Prepare the data
     - **Title**: string that will be displayed as a title of the object. It must not exceed 64 characters
     - **Code**: string that will be encoded in a QR code to access your object
-    - **Cover**: image file that will be displayed while listening to the Guide. It can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
+    - **Covers**: collection of image files that will be displayed while listening to the Guide. Amount of covers is not limited. Cover image can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
     - **Audio**: audio file that will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
-0. Upload **Cover** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files.
+0. Upload **Covers** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files.
 0. Connect to the DB and create a new row in the `objects` table using DB management tool
     - Set `code` to the value of  **Code**
     - Set `title` to the value of  **Title**
-    - Set `cover` to the path of the uploaded file **Cover**
     - Set `audio` to the path of the uploaded file **Audio**
+0. Create a new row in the `covers` table for each uploaded file from **Covers** collection
+    - Set `object_id` to the id of the row created in the previous step
+    - Set `index` to the number indicating the order in which the picture will be displayed
+    - Set `path` to the path of the uploaded file from **Covers** collection
 0. Encode **Code** to the QR Code to access your object from the Guide Bot 
 
 For testing purposes you also can use files from [/admin/test-data](/admin/test-data).
@@ -155,7 +158,7 @@ Project design:
 - All objects include:
   - Title - name of the object
   - Code - unique text data that is used for object identification
-  - Cover - image associated with the object
+  - Covers - array of images associated with the object
   - Audio - audio track associated with the object
 - Access to the objects is provided by scanning QR codes with encoded object code
 - Access to the objects is limited by token-based authorization
