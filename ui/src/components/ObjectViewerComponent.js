@@ -9,6 +9,7 @@ import { getObjectAudioURL, getObjectCoverURL, getObjectData } from '../api/guid
 import SliderComponent from './SliderComponent';
 import RippleContainer from './RippleContainer';
 import ImageComponent from './ImageComponent';
+import CarouselComponent from './CarouselContainer';
 
 function ObjectViewerComponent(props) {
     const { accessToken, objectCode } = props;
@@ -17,14 +18,15 @@ function ObjectViewerComponent(props) {
     useEffect(() => {
         setObjectData({ loaded: false, data: null, error: null });
         getObjectData(accessToken, objectCode).then((response) => {
-            setObjectData({ loaded: true, data: response.data.data, error: null });
+            const object = response.data.data;
+            object.covers.sort((a, b) => a.index - b.index);
+            setObjectData({ loaded: true, data: object, error: null });
         }).catch((error) => {
             setObjectData({ loaded: true, data: null, error: error.response.data.data });
         })
     }, [objectCode, accessToken])
 
     const audioURL = objectData.loaded ? getObjectAudioURL(accessToken, objectCode) : null;
-    const coverURL = objectData.loaded ? getObjectCoverURL(accessToken, objectCode) : null;
 
     const audioRef = useRef(new Audio());
     useEffect(() => {
@@ -117,9 +119,14 @@ function ObjectViewerComponent(props) {
         } else {
             return (
                 <div className="object-viewer-wrapper">
-                    <div className="image-viewer">
-                        <ImageComponent src={coverURL} alt="cover" />
-                    </div>
+                    <CarouselComponent className="image-viewer">
+                        {objectData.data.covers.length > 0 &&
+                            objectData.data.covers.map((cover) => {
+                                return (
+                                    <ImageComponent key={cover.index} src={getObjectCoverURL(accessToken, objectCode, cover.index)} alt="cover" />
+                                );
+                            })}
+                    </CarouselComponent>
                     <MarqueeComponent className="object-title" string={objectData.data.title} />
                     <SliderComponent className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
                     <div className="controls-bar">

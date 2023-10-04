@@ -20,7 +20,7 @@ function ImageComponent(props) {
 
     if (state != null) {
         return (
-            <img src={state} alt={alt} />
+            <img src={state} alt={alt} draggable="false"/>
         )
     }
 

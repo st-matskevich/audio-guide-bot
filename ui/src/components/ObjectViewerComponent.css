@@ -18,6 +18,7 @@
     aspect-ratio: 1 / 1;
     border-radius: 10%;
     background-color: var(--tg-theme-secondary-bg-color);
+    /*border: 3px solid var(--tg-theme-hint-color);*/
 }
 
 .image-viewer img {

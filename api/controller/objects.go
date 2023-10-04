@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/st-matskevich/audio-guide-bot/api/auth"
 	"github.com/st-matskevich/audio-guide-bot/api/blob"
@@ -22,7 +24,7 @@ func (controller *ObjectsController) GetRoutes() []Route {
 		},
 		{
 			Method:  "GET",
-			Path:    "/objects/:code/cover",
+			Path:    "/objects/:code/covers/:index",
 			Handler: controller.HandleGetObjectCover,
 		},
 		{
@@ -90,7 +92,26 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
 	}
 
-	err = controller.BlobProvider.ReadBlob(object.CoverPath, c.Response().BodyWriter())
+	coverIndex, err := strconv.Atoi(c.Params("index"))
+	if err != nil {
+		HandlerPrintf(c, "Failed to parse cover index - %v", err)
+		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse cover index")
+	}
+
+	coverPath := ""
+	for _, cover := range object.Covers {
+		if cover.Index == coverIndex {
+			coverPath = cover.Path
+			break
+		}
+	}
+
+	if coverPath == "" {
+		HandlerPrintf(c, "Cover not found")
+		return HandlerSendFailure(c, fiber.StatusNotFound, "Cover not found")
+	}
+
+	err = controller.BlobProvider.ReadBlob(coverPath, c.Response().BodyWriter())
 	if err != nil {
 		HandlerPrintf(c, "Blob read failed - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
