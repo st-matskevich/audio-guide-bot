@@ -21,19 +21,6 @@
     transition: transform .3s;
 }
 
-.range-input::-moz-range-thumb {
-    height: 16px;
-    width: 16px;
-    background-color: var(--tg-theme-button-color);
-    border-radius: 50%;
-    border: none;
-    transition: transform .3s;
-}
-
 .range-input.active::-webkit-slider-thumb {
-    transform: scale(1.25);
-}
-
-.range-input.active::-moz-range-thumb {
     transform: scale(1.25);
 }
