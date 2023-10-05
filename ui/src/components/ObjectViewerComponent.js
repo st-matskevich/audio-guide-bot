@@ -24,58 +24,54 @@ function ObjectViewerComponent(props) {
         }).catch((error) => {
             setObjectData({ loaded: true, data: null, error: error.response.data.data });
         })
-    }, [objectCode, accessToken])
+    }, [objectCode, accessToken]);
 
+    const audioRef = useRef();
     const audioURL = objectData.loaded ? getObjectAudioURL(accessToken, objectCode) : null;
-
-    const audioRef = useRef(new Audio());
-    useEffect(() => {
-        const ref = audioRef.current;
-        ref.src = audioURL;
-        setAudioPlaying(false);
-        setAudioProgress(0);
-
-        return () => {
-            ref.pause();
-        };
-    }, [audioURL]);
-
     const [audioPlaying, setAudioPlaying] = useState(false);
-    const toggleAudioPlay = () => {
-        if (audioPlaying) {
-            audioRef.current.pause();
-        } else {
-            audioRef.current.play();
-        }
-        setAudioPlaying(!audioPlaying);
-    }
-
     const [audioProgress, setAudioProgress] = useState(0);
-    useEffect(() => {
-        const ref = audioRef.current;
-        const onTimeUpdate = () => {
-            if (audioRef.current.duration > 0) {
-                const progress = ref.currentTime / ref.duration;
+
+    const onToggleAudioPlay = () => {
+        const current = audioRef.current;
+        if (current) {
+            if (audioPlaying) {
+                current.pause();
+            } else {
+                current.play();
+            }
+        }
+    };
+
+    const onAudioTimeUpdate = () => {
+        const current = audioRef.current;
+        if (current) {
+            if (current.duration > 0) {
+                const progress = current.currentTime / current.duration;
                 setAudioProgress(progress);
             }
-        };
-
-        const onAudioEnded = () => {
-            setAudioPlaying(false);
         }
+    };
 
-        ref.addEventListener('timeupdate', onTimeUpdate);
-        ref.addEventListener('ended', onAudioEnded);
-        return () => {
-            ref.removeEventListener('timeupdate', onTimeUpdate);
-            ref.removeEventListener('ended', onAudioEnded);
-        };
-    }, []);
+    const onAudioLoadStarted = () => {
+        setAudioPlaying(false);
+        setAudioProgress(0);
+    };
+
+    const onAudioPlay = () => {
+        setAudioPlaying(true);
+    };
+
+    const onAudioPause = () => {
+        setAudioPlaying(false);
+    };
 
     const onSeekAudio = (value) => {
-        audioRef.current.currentTime = audioRef.current.duration * value;
-        setAudioProgress(value);
-    }
+        const current = audioRef.current;
+        if (current) {
+            current.currentTime = current.duration * value;
+            setAudioProgress(value);
+        }
+    };
 
     const onScanQRClicked = () => {
         window.Telegram.WebApp.showScanQrPopup({});
@@ -120,14 +116,14 @@ function ObjectViewerComponent(props) {
             return (
                 <div className="object-viewer-wrapper">
                     <CarouselComponent className="image-viewer">
-                        {objectData.data.covers.length > 0 &&
-                            objectData.data.covers.map((cover) => {
-                                return (
-                                    <ImageComponent key={cover.index} src={getObjectCoverURL(accessToken, objectCode, cover.index)} alt="cover" />
-                                );
-                            })}
+                        {objectData.data.covers.map((cover) => {
+                            return (
+                                <ImageComponent key={cover.index} src={getObjectCoverURL(accessToken, objectCode, cover.index)} alt="cover" />
+                            );
+                        })}
                     </CarouselComponent>
                     <MarqueeComponent className="object-title" string={objectData.data.title} />
+                    <audio ref={audioRef} src={audioURL} onTimeUpdate={onAudioTimeUpdate} onLoadStart={onAudioLoadStarted} onPlay={onAudioPlay} onPause={onAudioPause} />
                     <SliderComponent className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
                     <div className="controls-bar">
                         <RippleContainer className="icon-button" onClick={onScanQRClicked}>
@@ -139,7 +135,7 @@ function ObjectViewerComponent(props) {
                                 alt="scan qr code"
                             />
                         </RippleContainer>
-                        <RippleContainer className="icon-button" onClick={toggleAudioPlay}>
+                        <RippleContainer className="icon-button" onClick={onToggleAudioPlay}>
                             {getPlayIcon()}
                         </RippleContainer>
                     </div>
