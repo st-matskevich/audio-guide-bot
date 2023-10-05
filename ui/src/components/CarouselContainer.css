@@ -21,6 +21,12 @@
     scroll-snap-stop: always;
 }
 
+.carousel-page{
+    min-width: 100%;
+    min-height: 100%;
+    overflow: hidden;
+}
+
 .carousel-paginator {
     position: absolute;
     bottom: 0;
@@ -33,7 +39,7 @@
     align-items: center;
 }
 
-.carousel-page {
+.carousel-page-icon {
     background-color: gray;
     border-radius: 50%;
     width: 8px;
@@ -41,7 +47,7 @@
     margin: 4px;
 }
 
-.carousel-page.active {
+.carousel-page-icon.active {
     background-color: white;
 }
 

@@ -39,7 +39,7 @@ function CarouselContainer(props) {
             return (
                 <div className='carousel-paginator'>
                     {Children.map(children, (_, index) =>
-                        <div className={`carousel-page ${index === activePage ? 'active' : ''}`} />
+                        <div className={`carousel-page-icon ${index === activePage ? 'active' : ''}`} />
                     )}
                 </div>
             )
@@ -51,7 +51,11 @@ function CarouselContainer(props) {
     return (
         <div className={`carousel-wrapper ${className}`}>
             <div className="carousel-container" onScroll={onScroll} ref={containerRef}>
-                {children}
+                {Children.map(children, (child) => (
+                    <div className="carousel-page">
+                        {child}
+                    </div>
+                ))}
             </div>
             {getPaginator()}
             {canNavigateLeft && (
