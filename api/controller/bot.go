@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -9,14 +12,15 @@ import (
 )
 
 const BUY_TICKET_QUERY = "buy_ticket"
-const TICKET_CURRENCY = "USD"
-const TICKET_PRICE = 100
+const TICKET_CURRENCY_KEY = "TICKET_CURRENCY"
+const TICKET_PRICE_KEY = "TICKET_PRICE"
 
 type BotController struct {
 	WebAppURL        string
 	BotPaymentsToken string
 	BotInteractor    bot.BotInteractor
 	TicketRepository repository.TicketRepository
+	ConfigRepository repository.ConfigRepository
 }
 
 func (controller *BotController) GetRoutes() []Route {
@@ -99,11 +103,24 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot
 			return HandlerSendFailure(c, fiber.StatusBadRequest, "Bot update didn't include a callback message")
 		}
 
+		price, err := controller.getTicketPrice()
+		if err != nil {
+			HandlerPrintf(c, "Failed to get ticket price - %v", err)
+
+			message := controller.buildPaymentsDisabledMessage()
+			if _, err := controller.BotInteractor.SendMessage(update.CallbackQuery.Message.Chat.Id, message.Message, message.Options); err != nil {
+				HandlerPrintf(c, "Failed to send bot message - %v", err)
+				return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
+			}
+
+			return HandlerSendSuccess(c, fiber.StatusOK, nil)
+		}
+
 		title := "Tour ticket"
 		description := "Ticket that allows to start the tour"
-		price := []gotgbot.LabeledPrice{{Label: "Price", Amount: int64(TICKET_PRICE)}}
+		labeledPrice := []gotgbot.LabeledPrice{{Label: "Price", Amount: int64(price.Price)}}
 		ticketCode := uuid.New()
-		if _, err := controller.BotInteractor.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), controller.BotPaymentsToken, TICKET_CURRENCY, price, nil); err != nil {
+		if _, err := controller.BotInteractor.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), controller.BotPaymentsToken, price.Currency, labeledPrice, nil); err != nil {
 			HandlerPrintf(c, "Failed to send bot invoice - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot invoice")
 		}
@@ -117,11 +134,17 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot
 func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *gotgbot.Update) error {
 	acceptCheckout := true
 
-	if update.PreCheckoutQuery.Currency != TICKET_CURRENCY {
+	price, err := controller.getTicketPrice()
+	if err != nil {
+		HandlerPrintf(c, "Failed to get ticket price - %v", err)
 		acceptCheckout = false
 	}
 
-	if update.PreCheckoutQuery.TotalAmount != TICKET_PRICE {
+	if update.PreCheckoutQuery.Currency != price.Currency {
+		acceptCheckout = false
+	}
+
+	if update.PreCheckoutQuery.TotalAmount != price.Price {
 		acceptCheckout = false
 	}
 
@@ -135,6 +158,43 @@ func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *gotg
 	}
 
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
+}
+
+type TicketPrice struct {
+	Currency string
+	Price    int64
+}
+
+func (controller *BotController) getTicketPrice() (TicketPrice, error) {
+	result := TicketPrice{}
+
+	currency, err := controller.ConfigRepository.GetValue(TICKET_CURRENCY_KEY)
+	if err != nil {
+		return TicketPrice{}, err
+	}
+
+	if currency == nil {
+		return TicketPrice{}, errors.New("ticket currency key not found")
+	}
+
+	priceString, err := controller.ConfigRepository.GetValue(TICKET_PRICE_KEY)
+	if err != nil {
+		return TicketPrice{}, err
+	}
+
+	if priceString == nil {
+		return TicketPrice{}, errors.New("ticket price key not found")
+	}
+
+	price, err := strconv.ParseInt(*priceString, 10, 64)
+	if err != nil {
+		return TicketPrice{}, err
+	}
+
+	result.Currency = *currency
+	result.Price = price
+
+	return result, nil
 }
 
 type BotMessage struct {
@@ -170,4 +230,10 @@ func (controller *BotController) buildPurchaseMessage(ticketCode uuid.UUID) BotM
 	}
 
 	return BotMessage{Message: message, Options: opts}
+}
+
+func (controller *BotController) buildPaymentsDisabledMessage() BotMessage {
+	message := "Sorry, payments are currently not available. Please try again later."
+
+	return BotMessage{Message: message, Options: nil}
 }

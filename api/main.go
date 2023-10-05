@@ -86,6 +86,7 @@ func main() {
 			BotPaymentsToken: paymentsToken,
 			BotInteractor:    botInteractor,
 			TicketRepository: &repository,
+			ConfigRepository: &repository,
 		},
 		&controller.TicketsController{
 			TokenProvider:    tokenProvier,
