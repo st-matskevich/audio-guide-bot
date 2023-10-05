@@ -133,7 +133,7 @@ To create an object in the Guide Bot you need:
     - **Code**: string that will be encoded in a QR code to access your object
     - **Covers**: collection of image files that will be displayed while listening to the Guide. Amount of covers is not limited. Cover image can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
     - **Audio**: audio file that will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
-0. Upload **Covers** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files.
+0. Upload **Covers** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files. Make sure to include the original file extension in the file name otherwise, some clients will not be able to play audio tracks.
 0. Connect to the DB and create a new row in the `objects` table using DB management tool
     - Set `code` to the value of  **Code**
     - Set `title` to the value of  **Title**
