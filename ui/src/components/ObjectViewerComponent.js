@@ -20,14 +20,14 @@ function ObjectViewerComponent(props) {
         getObjectData(accessToken, objectCode).then((response) => {
             const object = response.data.data;
             object.covers.sort((a, b) => a.index - b.index);
-            setObjectData({ loaded: true, data: object, error: null });
+            setObjectData({ loaded: true, code: objectCode, data: object, error: null });
         }).catch((error) => {
-            setObjectData({ loaded: true, data: null, error: error.response.data.data });
+            setObjectData({ loaded: true, code: null, data: null, error: error.response.data.data });
         })
     }, [objectCode, accessToken]);
 
     const audioRef = useRef();
-    const audioURL = objectData.loaded ? getObjectAudioURL(accessToken, objectCode) : null;
+    const audioURL = objectData.loaded ? getObjectAudioURL(accessToken, objectData.code) : null;
     const [audioPlaying, setAudioPlaying] = useState(false);
     const [audioProgress, setAudioProgress] = useState(0);
 
@@ -118,7 +118,7 @@ function ObjectViewerComponent(props) {
                     <CarouselComponent className="image-viewer">
                         {objectData.data.covers.map((cover) => {
                             return (
-                                <ImageComponent key={cover.index} src={getObjectCoverURL(accessToken, objectCode, cover.index)} alt="cover" />
+                                <ImageComponent key={cover.index} src={getObjectCoverURL(accessToken, objectData.code, cover.index)} alt="cover" />
                             );
                         })}
                     </CarouselComponent>
