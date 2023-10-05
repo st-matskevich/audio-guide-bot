@@ -6,7 +6,8 @@ ALTER TABLE objects
 UPDATE objects
     SET cover_path = covers.path
     FROM covers
-    WHERE objects.object_id = covers.object_id;
+    WHERE covers.object_id = objects.object_id
+    AND covers.index = 0;
 
 DROP TABLE covers;
 
