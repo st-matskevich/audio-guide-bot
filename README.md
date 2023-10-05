@@ -17,7 +17,7 @@ QR codes for the bot can be found in [/admin/test-data](/admin/test-data).
 ## Usage
 1. Complete [setup prerequisites](#setup-prerequisites)
 0. [Start the bot locally](#local-environment) or [deploy it to the production](#production-deployment)
-0. [Enter data about your objects](#administration)
+0. [Configure bot and enter data about your objects](#administration)
 0. Message your bot, buy a ticket, scan the code, and start listening
 
 ## Setup prerequisites
@@ -127,14 +127,21 @@ curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook?url=${BOT_API_
 In the case of [local environment](#local-environment), [pgAdmin](https://github.com/pgadmin-org/pgadmin4) for DB management and [s3gw-ui](https://github.com/aquarist-labs/s3gw-ui) for S3 management are already running as containers. Discover their addresses in your [docker daemon](https://docs.docker.com/engine/reference/commandline/ps/).  
 In case of [production deployment](#production-deployment), S3 management is available from [GCP Project Console](https://console.cloud.google.com), but for DB management you need to setup an instance of [pgAdmin](https://github.com/pgadmin-org/pgadmin4) with [cloud-sql-proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) to connect to your Cloud SQL instance. Instructions are available in [/admin](/admin).
 
+To configure the Guide Bot you need:
+1. Connect to the DB using DB management tool
+0. Create a row in `config` table with `key` equal to `TICKET_CURRENCY` and `value` equal to the ticket price [currency code](https://core.telegram.org/bots/payments#supported-currencies)
+0. Create a row in `config` table with `key` equal to `TICKET_PRICE` and `value` equal to the ticket price in the smallest units of the currency
+
 To create an object in the Guide Bot you need:
 1. Prepare the data
     - **Title**: string that will be displayed as a title of the object. It must not exceed 64 characters
     - **Code**: string that will be encoded in a QR code to access your object
     - **Covers**: collection of image files that will be displayed while listening to the Guide. Amount of covers is not limited. Cover image can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
     - **Audio**: audio file that will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
-0. Upload **Covers** and **Audio** to S3 bucket using S3 management tool and save paths to the uploaded files. Make sure to include the original file extension in the file name otherwise, some clients will not be able to play audio tracks.
-0. Connect to the DB and create a new row in the `objects` table using DB management tool
+0. Connect to the S3 bucket using S3 management tool
+0. Upload **Covers** and **Audio** to the bucket and save paths to the uploaded files. Make sure to include the original file extension in the file name otherwise, some clients will not be able to play audio tracks.
+0. Connect to the DB using DB management tool
+0. Create a new row in the `objects` table
     - Set `code` to the value of  **Code**
     - Set `title` to the value of  **Title**
     - Set `audio` to the path of the uploaded file **Audio**

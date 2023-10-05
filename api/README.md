@@ -23,6 +23,7 @@ Service is built on three abstractions:
 - Repositories - provide CRUD operations for data types, all interfaces are implemented as an aggregate [repository](./repository/repository.go) object
     - [repository/object](./repository/object.go) - implements CRUD operations for Object type
     - [repository/ticket](./repository/ticket.go) - implements CRUD operations for Ticket type
+    - [repository/config](./repository/config.go) - implements CRUD operations for configuration variables
 - Controllers - implement HTTP handlers with business logic, all handlers are implemented in compliance with [JSend](https://github.com/omniti-labs/jsend) specification
     - [controller/bot](./controller/bot.go) - implements logic to handle Telegram Bot API updates
     - [controller/objects](./controller/objects.go) - implements logic to interact with Object type
