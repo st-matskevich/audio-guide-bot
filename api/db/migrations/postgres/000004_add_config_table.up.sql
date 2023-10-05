@@ -1,0 +1,4 @@
+CREATE TABLE config(
+    config_id BIGSERIAL PRIMARY KEY, 
+    key VARCHAR(64) NOT NULL UNIQUE,
+    value VARCHAR(128) NOT NULL);
