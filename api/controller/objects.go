@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"path/filepath"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -117,6 +118,9 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 	}
 
+	filetype := filepath.Ext(coverPath)
+	c.Type(filetype)
+
 	return c.SendStatus(fiber.StatusOK)
 }
 
@@ -153,6 +157,9 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 		HandlerPrintf(c, "Blob read failed - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 	}
+
+	filetype := filepath.Ext(object.AudioPath)
+	c.Type(filetype)
 
 	// TODO: Accept-Ranges header allows seeking in the player,
 	// but proper Range header handling still needs to be implemented
