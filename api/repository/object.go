@@ -35,6 +35,7 @@ func (repository *Repository) GetObject(code string) (*Object, error) {
 	}
 
 	defer reader.Close()
+	result.Covers = []Cover{}
 	row := Cover{}
 	for {
 		ok, err := reader.NextRow(&row.Index, &row.Path)
