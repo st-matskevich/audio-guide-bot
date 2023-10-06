@@ -21,6 +21,7 @@ func (provider *S3BlobProvider) ReadBlob(name string, writer io.Writer) error {
 	if err != nil {
 		return err
 	}
+	defer object.Close()
 
 	_, err = io.Copy(writer, object)
 	if err != nil {

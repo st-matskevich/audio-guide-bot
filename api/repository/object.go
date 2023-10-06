@@ -21,8 +21,8 @@ func (repository *Repository) GetObject(code string) (*Object, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer reader.Close()
+
 	result := Object{}
 	found, err := reader.NextRow(&result.ID, &result.Title, &result.AudioPath)
 	if err != nil || !found {
@@ -33,8 +33,8 @@ func (repository *Repository) GetObject(code string) (*Object, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer reader.Close()
+
 	result.Covers = []Cover{}
 	row := Cover{}
 	for {

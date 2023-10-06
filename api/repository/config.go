@@ -9,8 +9,8 @@ func (repository *Repository) GetValue(key string) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer reader.Close()
+
 	result := ""
 	found, err := reader.NextRow(&result)
 	if err != nil || !found {
