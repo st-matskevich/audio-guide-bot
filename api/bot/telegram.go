@@ -6,12 +6,12 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
-type TelegramBotInteractor struct {
+type TelegramBotProvider struct {
 	PaymentsToken string
 	Bot           *gotgbot.Bot
 }
 
-func (interactor *TelegramBotInteractor) SendMessage(chatID int64, text string, options SendMessageOptions) error {
+func (interactor *TelegramBotProvider) SendMessage(chatID int64, text string, options SendMessageOptions) error {
 	opts := &gotgbot.SendMessageOpts{}
 
 	if options.InlineKeyboard != nil {
@@ -52,7 +52,7 @@ func (interactor *TelegramBotInteractor) SendMessage(chatID int64, text string, 
 	return nil
 }
 
-func (interactor *TelegramBotInteractor) AnswerCallbackQuery(queryID string) error {
+func (interactor *TelegramBotProvider) AnswerCallbackQuery(queryID string) error {
 	result, err := interactor.Bot.AnswerCallbackQuery(queryID, nil)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (interactor *TelegramBotInteractor) AnswerCallbackQuery(queryID string) err
 	return nil
 }
 
-func (interactor *TelegramBotInteractor) AnswerPreCheckoutQuery(queryID string, ok bool) error {
+func (interactor *TelegramBotProvider) AnswerPreCheckoutQuery(queryID string, ok bool) error {
 	result, err := interactor.Bot.AnswerPreCheckoutQuery(queryID, ok, nil)
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (interactor *TelegramBotInteractor) AnswerPreCheckoutQuery(queryID string, 
 	return nil
 }
 
-func (interactor *TelegramBotInteractor) SendInvoice(chatID int64, title string, description string, payload string, price InvoicePrice) error {
+func (interactor *TelegramBotProvider) SendInvoice(chatID int64, title string, description string, payload string, price InvoicePrice) error {
 	labeledPrice := []gotgbot.LabeledPrice{}
 	for _, part := range price.Parts {
 		labeledPrice = append(labeledPrice, gotgbot.LabeledPrice{Label: part.Label, Amount: part.Amount})
@@ -91,13 +91,13 @@ func (interactor *TelegramBotInteractor) SendInvoice(chatID int64, title string,
 	return nil
 }
 
-func CreateTelegramBotInteractor(botToken string, paymentsToken string) (BotInteractor, error) {
+func CreateTelegramBotProvider(botToken string, paymentsToken string) (BotProvider, error) {
 	bot, err := gotgbot.NewBot(botToken, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	interactor := TelegramBotInteractor{
+	interactor := TelegramBotProvider{
 		Bot:           bot,
 		PaymentsToken: paymentsToken,
 	}

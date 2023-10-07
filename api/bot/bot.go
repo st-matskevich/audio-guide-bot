@@ -29,7 +29,7 @@ type InvoicePrice struct {
 	Parts    []PricePart
 }
 
-type BotInteractor interface {
+type BotProvider interface {
 	SendMessage(chatID int64, text string, options SendMessageOptions) error
 	AnswerCallbackQuery(queryID string) error
 	AnswerPreCheckoutQuery(queryID string, ok bool) error

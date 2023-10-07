@@ -58,7 +58,7 @@ func main() {
 
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
-	botInteractor, err := bot.CreateTelegramBotInteractor(botToken, paymentsToken)
+	botProvider, err := bot.CreateTelegramBotProvider(botToken, paymentsToken)
 	if err != nil {
 		log.Fatalf("Telegram API initialization error: %v", err)
 	}
@@ -83,7 +83,7 @@ func main() {
 	controllers := []controller.Controller{
 		&controller.BotController{
 			WebAppURL:        webAppURL,
-			BotInteractor:    botInteractor,
+			BotProvider:      botProvider,
 			TicketRepository: &repository,
 			ConfigRepository: &repository,
 		},

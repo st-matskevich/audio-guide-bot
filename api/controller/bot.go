@@ -16,7 +16,7 @@ const TICKET_PRICE_KEY = "TICKET_PRICE"
 
 type BotController struct {
 	WebAppURL        string
-	BotInteractor    bot.BotInteractor
+	BotProvider      bot.BotProvider
 	TicketRepository repository.TicketRepository
 	ConfigRepository repository.ConfigRepository
 }
@@ -67,7 +67,7 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Upda
 		}
 
 		message, options := controller.buildPurchaseMessage(ticketCode)
-		if err := controller.BotInteractor.SendMessage(update.Message.Chat.Id, message, options); err != nil {
+		if err := controller.BotProvider.SendMessage(update.Message.Chat.Id, message, options); err != nil {
 			HandlerPrintf(c, "Failed to send bot message - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 		}
@@ -76,7 +76,7 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Upda
 	}
 
 	message, options := controller.buildWelcomeMessage()
-	if err := controller.BotInteractor.SendMessage(update.Message.Chat.Id, message, options); err != nil {
+	if err := controller.BotProvider.SendMessage(update.Message.Chat.Id, message, options); err != nil {
 		HandlerPrintf(c, "Failed to send bot message - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 	}
@@ -90,7 +90,7 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Bot update didn't include a callback data")
 	}
 
-	if err := controller.BotInteractor.AnswerCallbackQuery(update.CallbackQuery.Id); err != nil {
+	if err := controller.BotProvider.AnswerCallbackQuery(update.CallbackQuery.Id); err != nil {
 		HandlerPrintf(c, "Failed to answer callback query - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to answer callback query")
 	}
@@ -106,7 +106,7 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 			HandlerPrintf(c, "Failed to get ticket price - %v", err)
 
 			message, options := controller.buildPaymentsDisabledMessage()
-			if err := controller.BotInteractor.SendMessage(update.CallbackQuery.Message.Chat.Id, message, options); err != nil {
+			if err := controller.BotProvider.SendMessage(update.CallbackQuery.Message.Chat.Id, message, options); err != nil {
 				HandlerPrintf(c, "Failed to send bot message - %v", err)
 				return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 			}
@@ -118,7 +118,7 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 		description := "Ticket that allows to start the tour"
 		labeledPrice := bot.InvoicePrice{Currency: price.Currency, Parts: []bot.PricePart{{Label: "Price", Amount: price.Price}}}
 		ticketCode := uuid.New()
-		if err := controller.BotInteractor.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), labeledPrice); err != nil {
+		if err := controller.BotProvider.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), labeledPrice); err != nil {
 			HandlerPrintf(c, "Failed to send bot invoice - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot invoice")
 		}
@@ -150,7 +150,7 @@ func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.
 		acceptCheckout = false
 	}
 
-	if err := controller.BotInteractor.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id, acceptCheckout); err != nil {
+	if err := controller.BotProvider.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id, acceptCheckout); err != nil {
 		HandlerPrintf(c, "Failed to answer pre-checkout query - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to answer pre-checkout query")
 	}
