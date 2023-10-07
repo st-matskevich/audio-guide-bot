@@ -22,7 +22,7 @@ const useDebouncedCleanUp = (rippleCount, duration, onClean) => {
 function RippleContainer(props) {
     const { className, children, onClick } = props;
     const [rippleArray, setRippleArray] = useState([]);
-    const rippleDuration = 1000;
+    const rippleDuration = 500;
 
     useDebouncedCleanUp(rippleArray.length, rippleDuration, () => {
         setRippleArray([]);
