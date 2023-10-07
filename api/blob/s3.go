@@ -16,28 +16,22 @@ type S3BlobProvider struct {
 	bucketName string
 }
 
-func (provider *S3BlobProvider) ReadBlob(name string, writer io.Writer, options ReadBlobOptions) error {
+func (provider *S3BlobProvider) ReadBlob(name string, options ReadBlobOptions) (io.ReadCloser, error) {
 	getOptions := minio.GetObjectOptions{}
 
 	if options.Range != nil {
 		err := getOptions.SetRange(options.Range.Start, options.Range.End)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	object, err := provider.client.GetObject(context.Background(), provider.bucketName, name, getOptions)
 	if err != nil {
-		return err
-	}
-	defer object.Close()
-
-	_, err = io.Copy(writer, object)
-	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return object, err
 }
 
 func (provider *S3BlobProvider) WriteBlob(name string, reader io.Reader) error {

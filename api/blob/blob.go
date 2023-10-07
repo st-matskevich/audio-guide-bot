@@ -16,7 +16,7 @@ type ReadBlobOptions struct {
 }
 
 type BlobProvider interface {
-	ReadBlob(name string, writer io.Writer, options ReadBlobOptions) error
+	ReadBlob(name string, options ReadBlobOptions) (io.ReadCloser, error)
 	WriteBlob(name string, reader io.Reader) error
 	StatBlob(name string) (StatBlobResult, error)
 }

@@ -115,16 +115,16 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Cover not found")
 	}
 
-	err = controller.BlobProvider.ReadBlob(coverPath, c.Response().BodyWriter(), blob.ReadBlobOptions{})
+	reader, err := controller.BlobProvider.ReadBlob(coverPath, blob.ReadBlobOptions{})
 	if err != nil {
 		HandlerPrintf(c, "Blob read failed - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 	}
 
-	filetype := filepath.Ext(coverPath)
-	c.Type(filetype)
+	c.Type(filepath.Ext(coverPath))
+	c.Status(fiber.StatusOK)
 
-	return c.SendStatus(fiber.StatusOK)
+	return c.SendStream(reader)
 }
 
 func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
@@ -182,30 +182,30 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 		readOptions := blob.ReadBlobOptions{}
 		readOptions.Range = &ranges[0]
 
-		err = controller.BlobProvider.ReadBlob(object.AudioPath, c.Response().BodyWriter(), readOptions)
+		reader, err := controller.BlobProvider.ReadBlob(object.AudioPath, readOptions)
 		if err != nil {
 			HandlerPrintf(c, "Blob read failed - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 		}
 
-		filetype := filepath.Ext(object.AudioPath)
-		c.Type(filetype)
+		c.Type(filepath.Ext(object.AudioPath))
 		c.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", readOptions.Range.Start, readOptions.Range.End, blobStat.Size))
 		c.Set("Accept-Ranges", "bytes")
+		c.Status(fiber.StatusPartialContent)
 
-		return c.SendStatus(fiber.StatusPartialContent)
+		return c.SendStream(reader)
 	} else {
-		err = controller.BlobProvider.ReadBlob(object.AudioPath, c.Response().BodyWriter(), blob.ReadBlobOptions{})
+		reader, err := controller.BlobProvider.ReadBlob(object.AudioPath, blob.ReadBlobOptions{})
 		if err != nil {
 			HandlerPrintf(c, "Blob read failed - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 		}
 
-		filetype := filepath.Ext(object.AudioPath)
-		c.Type(filetype)
+		c.Type(filepath.Ext(object.AudioPath))
 		c.Set("Accept-Ranges", "bytes")
+		c.Status(fiber.StatusOK)
 
-		return c.SendStatus(fiber.StatusOK)
+		return c.SendStream(reader)
 	}
 }
 
