@@ -4,12 +4,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/st-matskevich/audio-guide-bot/api/auth"
 	"github.com/st-matskevich/audio-guide-bot/api/blob"
+	"github.com/st-matskevich/audio-guide-bot/api/bot"
 	"github.com/st-matskevich/audio-guide-bot/api/controller"
 	"github.com/st-matskevich/audio-guide-bot/api/db"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
@@ -57,7 +57,8 @@ func main() {
 	}))
 
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-	botInteractor, err := gotgbot.NewBot(botToken, nil)
+	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
+	botInteractor, err := bot.CreateTelegramBotInteractor(botToken, paymentsToken)
 	if err != nil {
 		log.Fatalf("Telegram API initialization error: %v", err)
 	}
@@ -78,12 +79,10 @@ func main() {
 	log.Println("JWT token provider initialized")
 
 	webAppURL := os.Getenv("TELEGRAM_WEB_APP_URL")
-	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
 	repository := repository.Repository{DBProvider: dbProvider}
 	controllers := []controller.Controller{
 		&controller.BotController{
 			WebAppURL:        webAppURL,
-			BotPaymentsToken: paymentsToken,
 			BotInteractor:    botInteractor,
 			TicketRepository: &repository,
 			ConfigRepository: &repository,

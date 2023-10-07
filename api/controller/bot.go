@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/st-matskevich/audio-guide-bot/api/bot"
@@ -17,7 +16,6 @@ const TICKET_PRICE_KEY = "TICKET_PRICE"
 
 type BotController struct {
 	WebAppURL        string
-	BotPaymentsToken string
 	BotInteractor    bot.BotInteractor
 	TicketRepository repository.TicketRepository
 	ConfigRepository repository.ConfigRepository
@@ -34,7 +32,7 @@ func (controller *BotController) GetRoutes() []Route {
 }
 
 func (controller *BotController) HandleBotUpdate(c *fiber.Ctx) error {
-	update := gotgbot.Update{}
+	update := bot.Update{}
 	if err := c.BodyParser(&update); err != nil {
 		HandlerPrintf(c, "Failed to parse input - %v", err)
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse input")
@@ -55,7 +53,7 @@ func (controller *BotController) HandleBotUpdate(c *fiber.Ctx) error {
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
 }
 
-func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *gotgbot.Update) error {
+func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Update) error {
 	if update.Message.SuccessfulPayment != nil {
 		ticketCode, err := uuid.Parse(update.Message.SuccessfulPayment.InvoicePayload)
 		if err != nil {
@@ -68,8 +66,8 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *gotgbot.
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to register ticket in DB")
 		}
 
-		message := controller.buildPurchaseMessage(ticketCode)
-		if _, err := controller.BotInteractor.SendMessage(update.Message.Chat.Id, message.Message, message.Options); err != nil {
+		message, options := controller.buildPurchaseMessage(ticketCode)
+		if err := controller.BotInteractor.SendMessage(update.Message.Chat.Id, message, options); err != nil {
 			HandlerPrintf(c, "Failed to send bot message - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 		}
@@ -77,8 +75,8 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *gotgbot.
 		return HandlerSendSuccess(c, fiber.StatusOK, nil)
 	}
 
-	message := controller.buildWelcomeMessage()
-	if _, err := controller.BotInteractor.SendMessage(update.Message.Chat.Id, message.Message, message.Options); err != nil {
+	message, options := controller.buildWelcomeMessage()
+	if err := controller.BotInteractor.SendMessage(update.Message.Chat.Id, message, options); err != nil {
 		HandlerPrintf(c, "Failed to send bot message - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 	}
@@ -86,13 +84,13 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *gotgbot.
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
 }
 
-func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot.Update) error {
+func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Update) error {
 	if update.CallbackQuery.Data == "" {
 		HandlerPrintf(c, "Bot update didn't include a callback data")
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Bot update didn't include a callback data")
 	}
 
-	if result, err := controller.BotInteractor.AnswerCallbackQuery(update.CallbackQuery.Id, nil); !result || err != nil {
+	if err := controller.BotInteractor.AnswerCallbackQuery(update.CallbackQuery.Id); err != nil {
 		HandlerPrintf(c, "Failed to answer callback query - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to answer callback query")
 	}
@@ -107,8 +105,8 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot
 		if err != nil {
 			HandlerPrintf(c, "Failed to get ticket price - %v", err)
 
-			message := controller.buildPaymentsDisabledMessage()
-			if _, err := controller.BotInteractor.SendMessage(update.CallbackQuery.Message.Chat.Id, message.Message, message.Options); err != nil {
+			message, options := controller.buildPaymentsDisabledMessage()
+			if err := controller.BotInteractor.SendMessage(update.CallbackQuery.Message.Chat.Id, message, options); err != nil {
 				HandlerPrintf(c, "Failed to send bot message - %v", err)
 				return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 			}
@@ -118,9 +116,9 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot
 
 		title := "Tour ticket"
 		description := "Ticket that allows to start the tour"
-		labeledPrice := []gotgbot.LabeledPrice{{Label: "Price", Amount: int64(price.Price)}}
+		labeledPrice := bot.InvoicePrice{Currency: price.Currency, Parts: []bot.PricePart{{Label: "Price", Amount: price.Price}}}
 		ticketCode := uuid.New()
-		if _, err := controller.BotInteractor.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), controller.BotPaymentsToken, price.Currency, labeledPrice, nil); err != nil {
+		if err := controller.BotInteractor.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), labeledPrice); err != nil {
 			HandlerPrintf(c, "Failed to send bot invoice - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot invoice")
 		}
@@ -131,7 +129,7 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *gotgbot
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
 }
 
-func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *gotgbot.Update) error {
+func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.Update) error {
 	acceptCheckout := true
 
 	price, err := controller.getTicketPrice()
@@ -152,7 +150,7 @@ func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *gotg
 		acceptCheckout = false
 	}
 
-	if result, err := controller.BotInteractor.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id, acceptCheckout, nil); !result || err != nil {
+	if err := controller.BotInteractor.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id, acceptCheckout); err != nil {
 		HandlerPrintf(c, "Failed to answer pre-checkout query - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to answer pre-checkout query")
 	}
@@ -197,43 +195,40 @@ func (controller *BotController) getTicketPrice() (TicketPrice, error) {
 	return result, nil
 }
 
-type BotMessage struct {
-	Message string
-	Options *gotgbot.SendMessageOpts
-}
-
-func (controller *BotController) buildWelcomeMessage() BotMessage {
+func (controller *BotController) buildWelcomeMessage() (string, bot.SendMessageOptions) {
 	message := "Let's start the tour!🎧\nPlease choose an option below to proceed"
-	opts := &gotgbot.SendMessageOpts{
-		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
-			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-				{Text: "Start the tour", WebApp: &gotgbot.WebAppInfo{Url: controller.WebAppURL}},
+	appURL := controller.WebAppURL
+	callbackQuery := BUY_TICKET_QUERY
+	opts := bot.SendMessageOptions{
+		InlineKeyboard: &bot.InlineKeyboardMarkup{
+			Markup: [][]bot.InlineKeyboardButton{{
+				{Text: "Start the tour", WebAppURL: &appURL},
 			}, {
-				{Text: "Buy a ticket", CallbackData: BUY_TICKET_QUERY},
+				{Text: "Buy a ticket", CallbackData: &callbackQuery},
 			}},
 		},
 	}
 
-	return BotMessage{Message: message, Options: opts}
+	return message, opts
 }
 
-func (controller *BotController) buildPurchaseMessage(ticketCode uuid.UUID) BotMessage {
+func (controller *BotController) buildPurchaseMessage(ticketCode uuid.UUID) (string, bot.SendMessageOptions) {
 	ticketString := ticketCode.String()
 	message := "Thank you for your purchase!\nYour ticket number: " + ticketString + "\nPlease tap the button below to proceed"
 	appURL := controller.WebAppURL + "?ticket=" + ticketString
-	opts := &gotgbot.SendMessageOpts{
-		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
-			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-				{Text: "Start the tour", WebApp: &gotgbot.WebAppInfo{Url: appURL}},
+	opts := bot.SendMessageOptions{
+		InlineKeyboard: &bot.InlineKeyboardMarkup{
+			Markup: [][]bot.InlineKeyboardButton{{
+				{Text: "Start the tour", WebAppURL: &appURL},
 			}},
 		},
 	}
 
-	return BotMessage{Message: message, Options: opts}
+	return message, opts
 }
 
-func (controller *BotController) buildPaymentsDisabledMessage() BotMessage {
+func (controller *BotController) buildPaymentsDisabledMessage() (string, bot.SendMessageOptions) {
 	message := "Sorry, payments are currently not available. Please try again later."
 
-	return BotMessage{Message: message, Options: nil}
+	return message, bot.SendMessageOptions{}
 }
