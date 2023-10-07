@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/st-matskevich/audio-guide-bot/api/auth"
@@ -112,7 +115,7 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Cover not found")
 	}
 
-	err = controller.BlobProvider.ReadBlob(coverPath, c.Response().BodyWriter())
+	err = controller.BlobProvider.ReadBlob(coverPath, c.Response().BodyWriter(), blob.ReadBlobOptions{})
 	if err != nil {
 		HandlerPrintf(c, "Blob read failed - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
@@ -152,17 +155,98 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
 	}
 
-	err = controller.BlobProvider.ReadBlob(object.AudioPath, c.Response().BodyWriter())
-	if err != nil {
-		HandlerPrintf(c, "Blob read failed - %v", err)
-		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
+	rangesHeader := c.Get(fiber.HeaderRange)
+	if rangesHeader != "" {
+		blobStat, err := controller.BlobProvider.StatBlob(object.AudioPath)
+		if err != nil {
+			HandlerPrintf(c, "Blob stat failed - %v", err)
+			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob stat failed")
+		}
+
+		units, ranges, err := controller.parseRange(rangesHeader, blobStat.Size)
+		if err != nil {
+			HandlerPrintf(c, "Failed to parse range header - %v", err)
+			return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse range header")
+		}
+
+		if units != "bytes" {
+			HandlerPrintf(c, "Incorrect range units - %v", units)
+			return HandlerSendFailure(c, fiber.StatusRequestedRangeNotSatisfiable, "Incorrect range units")
+		}
+
+		if len(ranges) < 1 {
+			HandlerPrintf(c, "No ranges provided")
+			return HandlerSendFailure(c, fiber.StatusRequestedRangeNotSatisfiable, "No ranges provided")
+		}
+
+		readOptions := blob.ReadBlobOptions{}
+		readOptions.Range = &ranges[0]
+
+		err = controller.BlobProvider.ReadBlob(object.AudioPath, c.Response().BodyWriter(), readOptions)
+		if err != nil {
+			HandlerPrintf(c, "Blob read failed - %v", err)
+			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
+		}
+
+		filetype := filepath.Ext(object.AudioPath)
+		c.Type(filetype)
+		c.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", readOptions.Range.Start, readOptions.Range.End, blobStat.Size))
+		c.Set("Accept-Ranges", "bytes")
+
+		return c.SendStatus(fiber.StatusPartialContent)
+	} else {
+		err = controller.BlobProvider.ReadBlob(object.AudioPath, c.Response().BodyWriter(), blob.ReadBlobOptions{})
+		if err != nil {
+			HandlerPrintf(c, "Blob read failed - %v", err)
+			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
+		}
+
+		filetype := filepath.Ext(object.AudioPath)
+		c.Type(filetype)
+		c.Set("Accept-Ranges", "bytes")
+
+		return c.SendStatus(fiber.StatusOK)
+	}
+}
+
+func (controller *ObjectsController) parseRange(header string, size int64) (string, []blob.BlobRange, error) {
+	if header == "" || !strings.Contains(header, "=") {
+		return "", nil, errors.New("malformed range header string")
 	}
 
-	filetype := filepath.Ext(object.AudioPath)
-	c.Type(filetype)
+	data := strings.Split(header, "=")
+	const expectedDataParts = 2
+	if len(data) != expectedDataParts {
+		return "", nil, errors.New("malformed range header string")
+	}
 
-	// TODO: Accept-Ranges header allows seeking in the player,
-	// but proper Range header handling still needs to be implemented
-	c.Set("Accept-Ranges", "bytes")
-	return c.SendStatus(fiber.StatusOK)
+	units := data[0]
+	ranges := []blob.BlobRange{}
+	arr := strings.Split(data[1], ",")
+	for i := 0; i < len(arr); i++ {
+		item := strings.Split(arr[i], "-")
+		if len(item) == 1 {
+			return "", nil, errors.New("malformed range header string")
+		}
+		start, startErr := strconv.ParseInt(item[0], 10, 64)
+		end, endErr := strconv.ParseInt(item[1], 10, 64)
+		if startErr != nil { // -nnn
+			start = size - end
+			end = size - 1
+		} else if endErr != nil { // nnn-
+			end = size - 1
+		}
+		if end > size-1 { // limit last-byte-pos to current length
+			end = size - 1
+		}
+		if start > end || start < 0 {
+			continue
+		}
+		ranges = append(ranges, blob.BlobRange{
+			Start: start,
+			End:   end,
+		})
+	}
+
+	return units, ranges, nil
 }

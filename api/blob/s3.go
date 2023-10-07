@@ -16,8 +16,17 @@ type S3BlobProvider struct {
 	bucketName string
 }
 
-func (provider *S3BlobProvider) ReadBlob(name string, writer io.Writer) error {
-	object, err := provider.client.GetObject(context.Background(), provider.bucketName, name, minio.GetObjectOptions{})
+func (provider *S3BlobProvider) ReadBlob(name string, writer io.Writer, options ReadBlobOptions) error {
+	getOptions := minio.GetObjectOptions{}
+
+	if options.Range != nil {
+		err := getOptions.SetRange(options.Range.Start, options.Range.End)
+		if err != nil {
+			return err
+		}
+	}
+
+	object, err := provider.client.GetObject(context.Background(), provider.bucketName, name, getOptions)
 	if err != nil {
 		return err
 	}
@@ -38,6 +47,17 @@ func (provider *S3BlobProvider) WriteBlob(name string, reader io.Reader) error {
 	}
 
 	return nil
+}
+
+func (provider *S3BlobProvider) StatBlob(name string) (StatBlobResult, error) {
+	stat, err := provider.client.StatObject(context.Background(), provider.bucketName, name, minio.StatObjectOptions{})
+	if err != nil {
+		return StatBlobResult{}, err
+	}
+
+	return StatBlobResult{
+		Size: stat.Size,
+	}, nil
 }
 
 func CreateS3BlobProvider(URL string) (BlobProvider, error) {
