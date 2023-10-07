@@ -31,6 +31,11 @@ function ObjectViewerComponent(props) {
     const [audioPlaying, setAudioPlaying] = useState(false);
     const [audioProgress, setAudioProgress] = useState(0);
 
+    useEffect(() => {
+        setAudioPlaying(false);
+        setAudioProgress(0);
+    }, [audioURL]);
+
     const onToggleAudioPlay = () => {
         const current = audioRef.current;
         if (current) {
@@ -50,11 +55,6 @@ function ObjectViewerComponent(props) {
                 setAudioProgress(progress);
             }
         }
-    };
-
-    const onAudioLoadStarted = () => {
-        setAudioPlaying(false);
-        setAudioProgress(0);
     };
 
     const onAudioPlay = () => {
@@ -123,7 +123,7 @@ function ObjectViewerComponent(props) {
                         })}
                     </CarouselComponent>
                     <MarqueeComponent className="object-title" string={objectData.data.title} />
-                    <audio ref={audioRef} src={audioURL} onTimeUpdate={onAudioTimeUpdate} onLoadStart={onAudioLoadStarted} onPlay={onAudioPlay} onPause={onAudioPause} />
+                    <audio ref={audioRef} src={audioURL} onTimeUpdate={onAudioTimeUpdate} onPlay={onAudioPlay} onPause={onAudioPause} />
                     <SliderComponent className="audio-range" value={audioProgress} min={0} max={1} step={0.01} onChange={onSeekAudio} />
                     <div className="controls-bar">
                         <RippleContainer className="icon-button" onClick={onScanQRClicked}>
