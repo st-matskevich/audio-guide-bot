@@ -9,9 +9,8 @@
     scroll-snap-type: x mandatory;
     display: flex;
     flex-direction: row;
-    align-items: baseline;
-    min-width: 100%;
-    min-height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 .carousel-container::-webkit-scrollbar {
