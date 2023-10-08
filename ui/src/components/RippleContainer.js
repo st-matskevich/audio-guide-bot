@@ -1,32 +1,14 @@
+import { isTouchDevice } from "../api/utils";
 import "./RippleContainer.css"
-import React, { useState, useEffect } from "react";
-
-const useDebouncedCleanUp = (rippleCount, duration, onClean) => {
-    useEffect(() => {
-        let bounce = null;
-        if (rippleCount > 0) {
-            clearTimeout(bounce);
-
-            bounce = setTimeout(() => {
-                onClean();
-                clearTimeout(bounce);
-            }, duration * 4);
-        }
-
-        return () => {
-            clearTimeout(bounce);
-        }
-    }, [rippleCount, duration, onClean]);
-};
+import React, { useState, useEffect, useCallback } from "react";
 
 function RippleContainer(props) {
     const { className, children, onClick } = props;
     const [rippleArray, setRippleArray] = useState([]);
+    const [cleanupTimer, setCleanupTimer] = useState(null);
     const rippleDuration = 500;
 
-    useDebouncedCleanUp(rippleArray.length, rippleDuration, () => {
-        setRippleArray([]);
-    });
+    console.log(cleanupTimer)
 
     const addRipple = (event) => {
         const container = event.currentTarget.getBoundingClientRect();
@@ -39,20 +21,36 @@ function RippleContainer(props) {
         setRippleArray([...rippleArray, ripple]);
     };
 
-    const handleClick = (event) => {
+    const onPointerDown = (event) => {
+        clearTimeout(cleanupTimer);
         addRipple(event);
-        if (onClick) {
-            onClick();
-        }
     }
 
+    const onPointerUp = useCallback(() => {
+        if(rippleArray.length > 0) {
+            setRippleArray((array) => array.map((ripple) => ({ ...ripple, inactive: true })));
+            setCleanupTimer(setTimeout(() => { setRippleArray([]); }, rippleDuration * 4));
+        }
+    }, [rippleArray])
+
+    useEffect(() => {
+        if(!isTouchDevice())
+        {
+            window.addEventListener("mouseup", onPointerUp);
+            return () => {
+                window.removeEventListener("mouseup", onPointerUp);
+            }
+        }
+    }, [onPointerUp]);
+
     return (
-        <div className={`ripple-container ${className}`} onClick={handleClick}>
+        <div className={`ripple-container ${className}`} onClick={onClick} onPointerDown={onPointerDown} onTouchEnd={onPointerUp} onTouchCancel={onPointerUp}>
             {rippleArray.length > 0 &&
                 rippleArray.map((ripple, index) => {
                     return (
                         <span
                             key={"span" + index}
+                            className={ripple.inactive ? "inactive" : ""}
                             style={{
                                 top: ripple.y,
                                 left: ripple.x,

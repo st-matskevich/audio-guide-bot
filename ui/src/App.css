@@ -10,6 +10,7 @@
   color: var(--tg-theme-text-color);
   height: min(100%, var(--tg-viewport-stable-height));
   transition: height .5s ease;
+  user-select: none;
 }
 
 .scanner-wrapper {

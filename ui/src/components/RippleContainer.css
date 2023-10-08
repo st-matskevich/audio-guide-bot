@@ -11,13 +11,18 @@
     opacity: 0.2;
     background-color: var(--tg-theme-button-text-color);
     animation-name: ripple;
-    animation-duration: var(--duration);
     animation-fill-mode: forwards;
+    animation-duration: var(--duration);
+    transition: opacity var(--duration);
+    pointer-events: none;
+}
+
+.ripple-container span.inactive {
+    opacity: 0;
 }
 
 @keyframes ripple {
     to {
-        opacity: 0;
         transform: scale(2);
     }
 }
