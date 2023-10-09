@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -101,9 +100,12 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 			return HandlerSendFailure(c, fiber.StatusBadRequest, "Bot update didn't include a callback message")
 		}
 
-		price, err := controller.getTicketPrice()
+		price, err := controller.getTicketPrice(c)
 		if err != nil {
 			HandlerPrintf(c, "Failed to get ticket price - %v", err)
+			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get ticket price")
+		} else if price == nil {
+			HandlerPrintf(c, "Ticket price is not set")
 
 			message, options := controller.buildPaymentsDisabledMessage()
 			if err := controller.BotProvider.SendMessage(update.CallbackQuery.Message.Chat.Id, message, options); err != nil {
@@ -130,27 +132,13 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 }
 
 func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.Update) error {
-	acceptCheckout := true
-
-	price, err := controller.getTicketPrice()
+	acceptCheckout, errorMessage, err := controller.validatePreCheckoutQuery(c, update)
 	if err != nil {
-		HandlerPrintf(c, "Failed to get ticket price - %v", err)
-		acceptCheckout = false
+		HandlerPrintf(c, "Failed to validate pre-checkout query - %v", err)
+		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to validate pre-checkout query")
 	}
 
-	if update.PreCheckoutQuery.Currency != price.Currency {
-		acceptCheckout = false
-	}
-
-	if update.PreCheckoutQuery.TotalAmount != price.Price {
-		acceptCheckout = false
-	}
-
-	if _, err := uuid.Parse(update.PreCheckoutQuery.InvoicePayload); err != nil {
-		acceptCheckout = false
-	}
-
-	if err := controller.BotProvider.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id, acceptCheckout); err != nil {
+	if err := controller.BotProvider.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id, acceptCheckout, bot.AnswerPreCheckoutQueryOptions{ErrorMessage: errorMessage}); err != nil {
 		HandlerPrintf(c, "Failed to answer pre-checkout query - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to answer pre-checkout query")
 	}
@@ -158,41 +146,85 @@ func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
 }
 
+func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *bot.Update) (bool, *string, error) {
+	price, err := controller.getTicketPrice(c)
+	if err != nil {
+		HandlerPrintf(c, "Failed to get ticket price - %v", err)
+		return false, nil, err
+	}
+
+	if price == nil {
+		message := "Ticket price is not set"
+		return false, &message, nil
+	}
+
+	if update.PreCheckoutQuery.Currency != price.Currency {
+		message := "Incorrect currency"
+		return false, &message, nil
+	}
+
+	if update.PreCheckoutQuery.TotalAmount != price.Price {
+		message := "Incorrect total price"
+		return false, &message, nil
+	}
+
+	ticketCode, err := uuid.Parse(update.PreCheckoutQuery.InvoicePayload)
+	if err != nil {
+		message := "Incorrect ticket code"
+		return false, &message, nil
+	}
+
+	ticket, err := controller.TicketRepository.GetTicket(ticketCode.String())
+	if err != nil {
+		HandlerPrintf(c, "Failed to get ticket  - %v", err)
+		return false, nil, err
+	}
+
+	if ticket != nil {
+		message := "Ticket already purchased"
+		return false, &message, nil
+	}
+
+	return true, nil, nil
+}
+
 type TicketPrice struct {
 	Currency string
 	Price    int64
 }
 
-func (controller *BotController) getTicketPrice() (TicketPrice, error) {
+func (controller *BotController) getTicketPrice(c *fiber.Ctx) (*TicketPrice, error) {
 	result := TicketPrice{}
 
 	currency, err := controller.ConfigRepository.GetValue(TICKET_CURRENCY_KEY)
 	if err != nil {
-		return TicketPrice{}, err
+		return nil, err
 	}
 
 	if currency == nil {
-		return TicketPrice{}, errors.New("ticket currency key not found")
+		HandlerPrintf(c, "Ticket currency key not found")
+		return nil, nil
 	}
 
 	priceString, err := controller.ConfigRepository.GetValue(TICKET_PRICE_KEY)
 	if err != nil {
-		return TicketPrice{}, err
+		return nil, err
 	}
 
 	if priceString == nil {
-		return TicketPrice{}, errors.New("ticket price key not found")
+		HandlerPrintf(c, "Ticket price key not found")
+		return nil, nil
 	}
 
 	price, err := strconv.ParseInt(*priceString, 10, 64)
 	if err != nil {
-		return TicketPrice{}, err
+		return nil, err
 	}
 
 	result.Currency = *currency
 	result.Price = price
 
-	return result, nil
+	return &result, nil
 }
 
 func (controller *BotController) buildWelcomeMessage() (string, bot.SendMessageOptions) {

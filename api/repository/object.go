@@ -7,6 +7,7 @@ type Cover struct {
 
 type Object struct {
 	ID        int64   `json:"-"`
+	Code      string  `json:"-"`
 	Title     string  `json:"title"`
 	Covers    []Cover `json:"covers"`
 	AudioPath string  `json:"-"`
@@ -49,5 +50,6 @@ func (repository *Repository) GetObject(code string) (*Object, error) {
 		result.Covers = append(result.Covers, row)
 	}
 
+	result.Code = code
 	return &result, nil
 }

@@ -65,8 +65,13 @@ func (interactor *TelegramBotProvider) AnswerCallbackQuery(queryID string) error
 	return nil
 }
 
-func (interactor *TelegramBotProvider) AnswerPreCheckoutQuery(queryID string, ok bool) error {
-	result, err := interactor.Bot.AnswerPreCheckoutQuery(queryID, ok, nil)
+func (interactor *TelegramBotProvider) AnswerPreCheckoutQuery(queryID string, ok bool, options AnswerPreCheckoutQueryOptions) error {
+	opts := &gotgbot.AnswerPreCheckoutQueryOpts{}
+	if options.ErrorMessage != nil {
+		opts.ErrorMessage = *options.ErrorMessage
+	}
+
+	result, err := interactor.Bot.AnswerPreCheckoutQuery(queryID, ok, opts)
 	if err != nil {
 		return err
 	}
