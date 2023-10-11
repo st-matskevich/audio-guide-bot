@@ -8,7 +8,7 @@ function ImageComponent(props) {
         const image = new Image();
         image.src = src;
 
-        const onImageLoaded= () => {
+        const onImageLoaded = () => {
             setState(src);
         }
 
@@ -16,11 +16,11 @@ function ImageComponent(props) {
         return () => {
             image.removeEventListener('load', onImageLoaded);
         }
-    })
+    }, [src]);
 
     if (state != null) {
         return (
-            <img src={state} alt={alt} draggable="false"/>
+            <img src={state} alt={alt} draggable="false" />
         )
     }
 
