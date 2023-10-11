@@ -2,7 +2,7 @@ import "./SliderComponent.css";
 import { useState } from "react";
 
 function SliderComponent(props) {
-    const {className, value, min, max, step, onChange} = props;
+    const { className, value, min, max, step, onChange } = props;
 
     const handleChange = (e) => {
         const newValue = parseFloat(e.target.value, 10);
@@ -12,11 +12,11 @@ function SliderComponent(props) {
     };
 
     const [hover, setHover] = useState(false);
-    const onTouchStart = (e) => {
+    const onTouchStart = () => {
         setHover(true)
     }
 
-    const onTouchEnd = (e) => {
+    const onTouchEnd = () => {
         setHover(false)
     }
 
@@ -34,6 +34,7 @@ function SliderComponent(props) {
             onChange={handleChange}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
+            onTouchCancel={onTouchEnd}
             onMouseEnter={onTouchStart}
             onMouseLeave={onTouchEnd}
         />
