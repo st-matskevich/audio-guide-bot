@@ -4,7 +4,7 @@
 Telegram bot for taking audio tours, built on top of [Telegram Mini App Template](https://github.com/st-matskevich/tg-mini-app-template).   
 
 Guide is available at [@audio_guide_bot](https://t.me/audio_guide_bot).  
-Bot supports mobile Telegram clients with Telegram Bot API version of at least 6.9.   
+Bot supports only mobile Telegram clients with Telegram Bot API version of at least 6.9.   
 Payments are working in test mode. Transactions must be made using test cards like `4242 4242 4242 4242`, other cards can be found in [payments provider docs](https://guide.tranzzo.com/docs/testing/cards/).  
 QR codes for the bot can be found in [/admin/test-data](/admin/test-data).
 
