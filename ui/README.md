@@ -11,13 +11,13 @@ Required environment variables:
 
 ## React app structure
 Components are used to build UI:
-- [App.js](./src/App.js) - entry component, used to handle authentication flow, interact with Telegram's API and show the initial interface
-- [ObjectViewerComponent.js](./src/components/ObjectViewerComponent.js) - component that handles object viewing, loads object metadata, and if it exists - shows cover image and loads audio
-- [MarqueeComponent.js](./src/components/MarqueeComponent.js) - replacement for an obsolete [\<marquee>](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee) HTML element
-- [SliderComponent.js](./src/components/SliderComponent.js) - range input element with custom styling
-- [RippleContainer.js](./src/components/RippleContainer.js) - container that adds visual 'ripple' effect on click
-- [ImageComponent.js](./src/components/ImageComponent.js) - component that will show image only after it's loaded
-- [CarouselContainer.js](./src/components/CarouselContainer.js) - container that allows to switch between object covers
+- [App.jsx](./src/App.jsx) - entry component, used to handle authentication flow, interact with Telegram's API and show the initial interface
+- [ObjectViewerComponent.jsx](./src/components/ObjectViewerComponent.jsx) - component that handles object viewing, loads object metadata, and if it exists - shows cover image and loads audio
+- [MarqueeComponent.jsx](./src/components/MarqueeComponent.jsx) - replacement for an obsolete [\<marquee>](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee) HTML element
+- [SliderComponent.jsx](./src/components/SliderComponent.jsx) - range input element with custom styling
+- [RippleContainer.jsx](./src/components/RippleContainer.jsx) - container that adds visual 'ripple' effect on click
+- [ImageComponent.jsx](./src/components/ImageComponent.jsx) - component that will show image only after it's loaded
+- [CarouselContainer.jsx](./src/components/CarouselContainer.jsx) - container that allows to switch between object covers
 
 Helpers are used to decouple and isolate APIs from React:
 - [auth.js](./src/api/auth.js) - implements token storage and refresh logic

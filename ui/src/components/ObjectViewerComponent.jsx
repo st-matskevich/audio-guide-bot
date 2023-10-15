@@ -1,9 +1,9 @@
 import './ObjectViewerComponent.css';
 import './CommonStyles.css';
 import MarqueeComponent from './MarqueeComponent';
-import { ReactComponent as PlayIcon } from '../assets/play.svg';
-import { ReactComponent as PauseIcon } from '../assets/pause.svg';
-import { ReactComponent as QRIcon } from '../assets/qr-code.svg';
+import PlayIcon from '../assets/play.svg?react';
+import PauseIcon from '../assets/pause.svg?react';
+import QRIcon from '../assets/qr-code.svg?react';
 import { useRef, useState, useEffect } from "react";
 import { getObjectAudioURL, getObjectCoverURL, getObjectData } from '../api/guide';
 import SliderComponent from './SliderComponent';

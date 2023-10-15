@@ -1,14 +1,12 @@
 import { isTouchDevice } from "../api/utils";
 import "./RippleContainer.css"
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 function RippleContainer(props) {
     const { className, children, onClick } = props;
     const [rippleArray, setRippleArray] = useState([]);
     const [cleanupTimer, setCleanupTimer] = useState(null);
     const rippleDuration = 500;
-
-    console.log(cleanupTimer)
 
     const addRipple = (event) => {
         const container = event.currentTarget.getBoundingClientRect();

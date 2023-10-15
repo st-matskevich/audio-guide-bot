@@ -1,7 +1,7 @@
 import './CarouselContainer.css';
 import { Children, useRef, useState } from 'react';
-import { ReactComponent as LeftIcon } from '../assets/left.svg';
-import { ReactComponent as RightIcon } from '../assets/right.svg';
+import LeftIcon from '../assets/left.svg?react';
+import RightIcon from '../assets/right.svg?react';
 
 function CarouselContainer(props) {
     const { className, children } = props;

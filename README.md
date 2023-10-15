@@ -194,6 +194,7 @@ Project design:
 - [Docker](https://www.docker.com/)
 - [Go](https://go.dev/)
 - [React](https://react.dev/)
+- [Vite](https://vitejs.dev)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Fiber](https://github.com/gofiber/fiber)
 - [gotgbot](https://github.com/PaulSonOfLars/gotgbot)

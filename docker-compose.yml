@@ -68,13 +68,13 @@ services:
   # Bot UI in development mode
   bot-ui:
     environment:
-      WATCHPACK_POLLING: true
-      WDS_SOCKET_PORT: 443
       REACT_APP_BOT_API_URL: https://${NGROK_DOMAIN}/api
     restart: on-failure
     volumes:
       - ./ui/src:/app/src
       - ./ui/public:/app/public
+      - ./ui/index.html:/app/index.html
+      - ./ui/vite.config.js:/app/vite.config.js
     build:
       context: ./ui
       dockerfile: dev.dockerfile

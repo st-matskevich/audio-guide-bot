@@ -6,6 +6,6 @@ COPY package.json ./
 COPY package-lock.json ./
 RUN npm ci
 
-COPY setup-env-config.js ./
+COPY setup-env-config.cjs ./
 
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["npm", "run", "dev"]
