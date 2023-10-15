@@ -1,7 +1,7 @@
-import './CarouselContainer.css';
-import { Children, useRef, useState } from 'react';
-import { ReactComponent as LeftIcon } from '../assets/left.svg';
-import { ReactComponent as RightIcon } from '../assets/right.svg';
+import "./CarouselContainer.css";
+import { Children, useRef, useState } from "react";
+import LeftIcon from "../assets/left.svg?react";
+import RightIcon from "../assets/right.svg?react";
 
 function CarouselContainer(props) {
     const { className, children } = props;
@@ -16,7 +16,7 @@ function CarouselContainer(props) {
         const pageWidth = e.target.scrollWidth / pageCount;
         const page = Math.round(e.target.scrollLeft / pageWidth);
         setActivePage(page);
-    }
+    };
 
     const onNavigateRight = () => {
         const current = containerRef.current;
@@ -24,7 +24,7 @@ function CarouselContainer(props) {
             const pageWidth = current.scrollWidth / pageCount;
             current.scrollTo({ left: pageWidth * (activePage + 1), behavior: "smooth" });
         }
-    }
+    };
 
     const onNavigateLeft = () => {
         const current = containerRef.current;
@@ -32,21 +32,21 @@ function CarouselContainer(props) {
             const pageWidth = current.scrollWidth / pageCount;
             current.scrollTo({ left: pageWidth * (activePage - 1), behavior: "smooth" });
         }
-    }
+    };
 
     const getPaginator = () => {
         if (pageCount > 1) {
             return (
                 <div className='carousel-paginator'>
                     {Children.map(children, (_, index) =>
-                        <div className={`carousel-page-icon ${index === activePage ? 'active' : ''}`} />
+                        <div className={`carousel-page-icon ${index === activePage ? "active" : ""}`} />
                     )}
                 </div>
-            )
+            );
         }
 
         return null;
-    }
+    };
 
     return (
         <div className={`carousel-wrapper ${className}`}>
@@ -77,7 +77,7 @@ function CarouselContainer(props) {
                 </div>
             )}
         </div>
-    )
+    );
 }
 
 export default CarouselContainer;

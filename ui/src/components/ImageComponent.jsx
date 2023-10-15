@@ -10,18 +10,18 @@ function ImageComponent(props) {
 
         const onImageLoaded = () => {
             setState(src);
-        }
+        };
 
-        image.addEventListener('load', onImageLoaded);
+        image.addEventListener("load", onImageLoaded);
         return () => {
-            image.removeEventListener('load', onImageLoaded);
-        }
+            image.removeEventListener("load", onImageLoaded);
+        };
     }, [src]);
 
     if (state != null) {
         return (
             <img src={state} alt={alt} draggable="false" />
-        )
+        );
     }
 
     return null;

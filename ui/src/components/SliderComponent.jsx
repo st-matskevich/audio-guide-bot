@@ -13,12 +13,12 @@ function SliderComponent(props) {
 
     const [hover, setHover] = useState(false);
     const onTouchStart = () => {
-        setHover(true)
-    }
+        setHover(true);
+    };
 
     const onTouchEnd = () => {
-        setHover(false)
-    }
+        setHover(false);
+    };
 
     const progress = ((value - min) / (max - min)) * 100;
 

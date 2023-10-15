@@ -1,3 +1,3 @@
 export const isTouchDevice = () => {
-    return 'ontouchstart' in window;
-}
+    return "ontouchstart" in window;
+};

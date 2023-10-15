@@ -1,20 +1,20 @@
-import './ObjectViewerComponent.css';
-import './CommonStyles.css';
-import MarqueeComponent from './MarqueeComponent';
-import { ReactComponent as PlayIcon } from '../assets/play.svg';
-import { ReactComponent as PauseIcon } from '../assets/pause.svg';
-import { ReactComponent as QRIcon } from '../assets/qr-code.svg';
+import "./ObjectViewerComponent.css";
+import "./CommonStyles.css";
+import MarqueeComponent from "./MarqueeComponent";
+import PlayIcon from "../assets/play.svg?react";
+import PauseIcon from "../assets/pause.svg?react";
+import QRIcon from "../assets/qr-code.svg?react";
 import { useRef, useState, useEffect } from "react";
-import { getObjectAudioURL, getObjectCoverURL, getObjectData } from '../api/guide';
-import SliderComponent from './SliderComponent';
-import RippleContainer from './RippleContainer';
-import ImageComponent from './ImageComponent';
-import CarouselComponent from './CarouselContainer';
+import { getObjectAudioURL, getObjectCoverURL, getObjectData } from "../api/guide";
+import SliderComponent from "./SliderComponent";
+import RippleContainer from "./RippleContainer";
+import ImageComponent from "./ImageComponent";
+import CarouselComponent from "./CarouselContainer";
 
 function ObjectViewerComponent(props) {
     const { accessToken, objectCode } = props;
 
-    const [objectData, setObjectData] = useState({ loaded: false, data: null, error: null })
+    const [objectData, setObjectData] = useState({ loaded: false, data: null, error: null });
     useEffect(() => {
         setObjectData({ loaded: false, data: null, error: null });
         getObjectData(accessToken, objectCode).then((response) => {
@@ -23,7 +23,7 @@ function ObjectViewerComponent(props) {
             setObjectData({ loaded: true, code: objectCode, data: object, error: null });
         }).catch((error) => {
             setObjectData({ loaded: true, code: null, data: null, error: error.response.data.data });
-        })
+        });
     }, [objectCode, accessToken]);
 
     const audioRef = useRef();
@@ -87,7 +87,7 @@ function ObjectViewerComponent(props) {
                     stroke="var(--tg-theme-button-text-color)"
                     alt="pause guide"
                 />
-            )
+            );
         } else {
             return (
                 <PlayIcon
@@ -97,13 +97,13 @@ function ObjectViewerComponent(props) {
                     stroke="var(--tg-theme-button-text-color)"
                     alt="play guide"
                 />
-            )
+            );
         }
-    }
+    };
 
     const getUI = () => {
         if (!objectData.loaded) {
-            return (<div className="preloader" />)
+            return (<div className="preloader" />);
         } else if (objectData.error != null) {
             return (
                 <div className="object-viewer-wrapper">
@@ -111,7 +111,7 @@ function ObjectViewerComponent(props) {
                     <span>{objectData.error}</span>
                     <RippleContainer className="button" onClick={onScanQRClicked}>Scan QR</RippleContainer>
                 </div>
-            )
+            );
         } else {
             return (
                 <div className="object-viewer-wrapper">
@@ -140,9 +140,9 @@ function ObjectViewerComponent(props) {
                         </RippleContainer>
                     </div>
                 </div>
-            )
+            );
         }
-    }
+    };
 
     return getUI();
 }

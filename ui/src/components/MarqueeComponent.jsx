@@ -17,11 +17,11 @@ function MarqueeComponent(props) {
 
     return (
         <div className={`marquee-container ${className}`} ref={containerRef}>
-            <div className={`marquee-content ${isOverflow ? '' : 'inactive'}`}>
+            <div className={`marquee-content ${isOverflow ? "" : "inactive"}`}>
                 {string}
             </div>
         </div>
-    )
+    );
 }
 
 export default MarqueeComponent;
