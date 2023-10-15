@@ -1,8 +1,8 @@
 const MIN_TELEGRAM_BOT_API = "6.9";
 
 const isVersionGreaterOrEqual = (versionA, versionB) => {
-    const vAParts = versionA.split('.').map(Number);
-    const vBParts = versionB.split('.').map(Number);
+    const vAParts = versionA.split(".").map(Number);
+    const vBParts = versionB.split(".").map(Number);
 
     for (let i = 0; i < Math.min(vAParts.length, vBParts.length); i++) {
         const partA = vAParts[i];
@@ -16,11 +16,11 @@ const isVersionGreaterOrEqual = (versionA, versionB) => {
     }
 
     return true;
-}
+};
 
 export const isTelegramAPISupported = () => {
     return isVersionGreaterOrEqual(window.Telegram.WebApp.version, MIN_TELEGRAM_BOT_API);
-}
+};
 
 export const getCloudValue = (key) => {
     return new Promise((resolve, reject) => {
@@ -30,8 +30,8 @@ export const getCloudValue = (key) => {
             } else {
                 return resolve(value);
             }
-        })
-    })
+        });
+    });
 };
 
 export const setCloudValue = (key, value) => {
@@ -42,6 +42,6 @@ export const setCloudValue = (key, value) => {
             } else {
                 return resolve(result);
             }
-        })
-    })
+        });
+    });
 };

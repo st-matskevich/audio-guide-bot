@@ -4,10 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "node setup-env-config.cjs && vite",
-    "build": "node setup-env-config.cjs && vite build",
+    "setup-env": "node setup-env-config.cjs",
+    "dev": "npm run setup-env && vite",
+    "build": "npm run setup-env && vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "node setup-env-config.cjs && vite preview"
+    "preview": "npm run setup-env && vite preview"
   },
   "dependencies": {
     "axios": "^1.5.1",

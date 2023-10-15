@@ -1,5 +1,5 @@
 import { isTouchDevice } from "../api/utils";
-import "./RippleContainer.css"
+import "./RippleContainer.css";
 import { useState, useEffect, useCallback } from "react";
 
 function RippleContainer(props) {
@@ -22,14 +22,14 @@ function RippleContainer(props) {
     const onPointerDown = (event) => {
         clearTimeout(cleanupTimer);
         addRipple(event);
-    }
+    };
 
     const onPointerUp = useCallback(() => {
         if(rippleArray.length > 0) {
             setRippleArray((array) => array.map((ripple) => ({ ...ripple, inactive: true })));
             setCleanupTimer(setTimeout(() => { setRippleArray([]); }, rippleDuration * 4));
         }
-    }, [rippleArray])
+    }, [rippleArray]);
 
     useEffect(() => {
         if(!isTouchDevice())
@@ -37,7 +37,7 @@ function RippleContainer(props) {
             window.addEventListener("mouseup", onPointerUp);
             return () => {
                 window.removeEventListener("mouseup", onPointerUp);
-            }
+            };
         }
     }, [onPointerUp]);
 
@@ -62,6 +62,6 @@ function RippleContainer(props) {
             {children}
         </div>
     );
-};
+}
 
 export default RippleContainer;

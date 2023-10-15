@@ -1,16 +1,16 @@
 import jwt_decode from "jwt-decode";
-import { isTelegramAPISupported, getCloudValue, setCloudValue } from './telegram';
-import { exchangeTicketForToken } from './guide';
+import { isTelegramAPISupported, getCloudValue, setCloudValue } from "./telegram";
+import { exchangeTicketForToken } from "./guide";
 
-const TICKET_URL_PARAM = "ticket"
-const CLOUD_TOKEN_KEY = "AUTH_TOKEN"
-const TOKEN_CHANGED_EVENT = "TOKEN_CHANGED"
+const TICKET_URL_PARAM = "ticket";
+const CLOUD_TOKEN_KEY = "AUTH_TOKEN";
+const TOKEN_CHANGED_EVENT = "TOKEN_CHANGED";
 
-const dispatcher = new EventTarget()
+const dispatcher = new EventTarget();
 let state = {
     token: null,
     loaded: false,
-}
+};
 
 // refreshes token if needed
 // - if token is (null or expired) AND ticket is not null
@@ -33,7 +33,7 @@ const refreshToken = (jwt) => {
             const token = response.data.data.token;
             return setCloudValue(CLOUD_TOKEN_KEY, token).then(() => {
                 return resolve(token);
-            })
+            });
         }).catch((err) => {
             // 403 = ticket is already activated and cannot be exchanged
             if (err?.response?.status === 403) {
@@ -41,31 +41,31 @@ const refreshToken = (jwt) => {
             } else {
                 reject(err);
             }
-        })
-    })
-}
+        });
+    });
+};
 
 const decodeJWT = (value) => {
     try {
-        return { token: value, claims: jwt_decode(value) }
+        return { token: value, claims: jwt_decode(value) };
     } catch (err) {
         return null;
     }
-}
+};
 
 const getToken = () => {
     state.loaded = false;
     getCloudValue(CLOUD_TOKEN_KEY).then((value) => {
-        return decodeJWT(value)
+        return decodeJWT(value);
     }).then((jwt) => {
-        return refreshToken(jwt)
+        return refreshToken(jwt);
     }).then((token) => {
         state.token = token;
         state.loaded = true;
         const event = new CustomEvent(TOKEN_CHANGED_EVENT, { detail: token });
         dispatcher.dispatchEvent(event);
-    })
-}
+    });
+};
 
 if(isTelegramAPISupported()) {
     getToken();
@@ -75,9 +75,9 @@ export const addTokenListener = (callback) => {
     if (state.loaded) {
         callback(state.token);
     }
-    dispatcher.addEventListener(TOKEN_CHANGED_EVENT, callback)
-}
+    dispatcher.addEventListener(TOKEN_CHANGED_EVENT, callback);
+};
 
 export const removeTokenListener = (callback) => {
-    dispatcher.removeEventListener(TOKEN_CHANGED_EVENT, callback)
-}
+    dispatcher.removeEventListener(TOKEN_CHANGED_EVENT, callback);
+};
