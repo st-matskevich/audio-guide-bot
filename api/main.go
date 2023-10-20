@@ -13,6 +13,7 @@ import (
 	"github.com/st-matskevich/audio-guide-bot/api/controller"
 	"github.com/st-matskevich/audio-guide-bot/api/db"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
+	"github.com/st-matskevich/audio-guide-bot/api/translation"
 )
 
 func main() {
@@ -78,14 +79,21 @@ func main() {
 	}
 	log.Println("JWT token provider initialized")
 
+	translationProvier, err := translation.CreateI18NTranslationProvider()
+	if err != nil {
+		log.Fatalf("Translation provider initialization error: %v", err)
+	}
+	log.Println("Translation provider initialized")
+
 	webAppURL := os.Getenv("TELEGRAM_WEB_APP_URL")
 	repository := repository.Repository{DBProvider: dbProvider}
 	controllers := []controller.Controller{
 		&controller.BotController{
-			WebAppURL:        webAppURL,
-			BotProvider:      botProvider,
-			TicketRepository: &repository,
-			ConfigRepository: &repository,
+			WebAppURL:           webAppURL,
+			BotProvider:         botProvider,
+			TranslationProvider: translationProvier,
+			TicketRepository:    &repository,
+			ConfigRepository:    &repository,
 		},
 		&controller.TicketsController{
 			TokenProvider:    tokenProvier,
