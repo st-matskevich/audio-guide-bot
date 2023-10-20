@@ -1,0 +1,16 @@
+{
+    "MESSAGE_WELCOME": "Let's start the tour!🎧\nPlease choose an option below to proceed.",
+    "BUTTON_START_TOUR": "Start the tour",
+    "BUTTON_BUY_TICKET": "Buy a ticket",
+    "MESSAGE_PURCHASED_TICKET": "Thank you for your purchase!\nYour ticket code: {{.TICKET_CODE}}\nPlease tap the button below to proceed.",
+    "MESSAGE_PAYMENTS_NOT_AVAILABLE": "Sorry, payments are currently not available. Please try again later.",
+    "PAYMENT_TICKET_TITLE": "Tour ticket",
+    "PAYMENT_TICKET_DESCRIPTION": "Ticket that allows to start the tour",
+    "PAYMENT_TICKET_PRICE_PART_PRICE": "Price",
+    "BUTTON_PAY": "Pay",
+    "PAYMENT_FAIL_PRICE_NOT_SET": "Ticket price is not set",
+    "PAYMENT_FAIL_INVALID_CURRENCY": "Incorrect currency",
+    "PAYMENT_FAIL_INVALID_PRICE": "Incorrect total price",
+    "PAYMENT_FAIL_INVALID_TICKET": "Incorrect ticket code",
+    "PAYMENT_FAIL_TICKET_SOLD": "Ticket already purchased"
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/st-matskevich/audio-guide-bot/api/bot"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
+	"github.com/st-matskevich/audio-guide-bot/api/translation"
 )
 
 const BUY_TICKET_QUERY = "buy_ticket"
@@ -14,10 +15,11 @@ const TICKET_CURRENCY_KEY = "TICKET_CURRENCY"
 const TICKET_PRICE_KEY = "TICKET_PRICE"
 
 type BotController struct {
-	WebAppURL        string
-	BotProvider      bot.BotProvider
-	TicketRepository repository.TicketRepository
-	ConfigRepository repository.ConfigRepository
+	WebAppURL           string
+	BotProvider         bot.BotProvider
+	TranslationProvider translation.TranslationProvider
+	TicketRepository    repository.TicketRepository
+	ConfigRepository    repository.ConfigRepository
 }
 
 func (controller *BotController) GetRoutes() []Route {
@@ -53,6 +55,8 @@ func (controller *BotController) HandleBotUpdate(c *fiber.Ctx) error {
 }
 
 func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Update) error {
+	locale := update.Message.From.LanguageCode
+
 	if update.Message.SuccessfulPayment != nil {
 		ticketCode, err := uuid.Parse(update.Message.SuccessfulPayment.InvoicePayload)
 		if err != nil {
@@ -65,7 +69,12 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Upda
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to register ticket in DB")
 		}
 
-		message, options := controller.buildPurchaseMessage(ticketCode)
+		message, options, err := controller.buildPurchaseMessage(locale, ticketCode)
+		if err != nil {
+			HandlerPrintf(c, "Failed to prepare message - %v", err)
+			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare message")
+		}
+
 		if err := controller.BotProvider.SendMessage(update.Message.Chat.Id, message, options); err != nil {
 			HandlerPrintf(c, "Failed to send bot message - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
@@ -74,7 +83,12 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Upda
 		return HandlerSendSuccess(c, fiber.StatusOK, nil)
 	}
 
-	message, options := controller.buildWelcomeMessage()
+	message, options, err := controller.buildWelcomeMessage(locale)
+	if err != nil {
+		HandlerPrintf(c, "Failed to prepare message - %v", err)
+		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare message")
+	}
+
 	if err := controller.BotProvider.SendMessage(update.Message.Chat.Id, message, options); err != nil {
 		HandlerPrintf(c, "Failed to send bot message - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
@@ -84,6 +98,8 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Upda
 }
 
 func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Update) error {
+	locale := update.CallbackQuery.From.LanguageCode
+
 	if update.CallbackQuery.Data == "" {
 		HandlerPrintf(c, "Bot update didn't include a callback data")
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Bot update didn't include a callback data")
@@ -107,7 +123,12 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 		} else if price == nil {
 			HandlerPrintf(c, "Ticket price is not set")
 
-			message, options := controller.buildPaymentsDisabledMessage()
+			message, options, err := controller.buildPaymentsDisabledMessage(locale)
+			if err != nil {
+				HandlerPrintf(c, "Failed to prepare message - %v", err)
+				return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare message")
+			}
+
 			if err := controller.BotProvider.SendMessage(update.CallbackQuery.Message.Chat.Id, message, options); err != nil {
 				HandlerPrintf(c, "Failed to send bot message - %v", err)
 				return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
@@ -116,11 +137,14 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 			return HandlerSendSuccess(c, fiber.StatusOK, nil)
 		}
 
-		title := "Tour ticket"
-		description := "Ticket that allows to start the tour"
-		labeledPrice := bot.InvoicePrice{Currency: price.Currency, Parts: []bot.PricePart{{Label: "Price", Amount: price.Price}}}
+		invoice, err := controller.buildInvoiceData(locale, *price)
+		if err != nil {
+			HandlerPrintf(c, "Failed to prepare invoice - %v", err)
+			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare invoice")
+		}
+
 		ticketCode := uuid.New()
-		if err := controller.BotProvider.SendInvoice(update.CallbackQuery.Message.Chat.Id, title, description, ticketCode.String(), labeledPrice); err != nil {
+		if err := controller.BotProvider.SendInvoice(update.CallbackQuery.Message.Chat.Id, invoice.Title, invoice.Description, ticketCode.String(), invoice.Price, invoice.Options); err != nil {
 			HandlerPrintf(c, "Failed to send bot invoice - %v", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot invoice")
 		}
@@ -132,7 +156,8 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 }
 
 func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.Update) error {
-	acceptCheckout, errorMessage, err := controller.validatePreCheckoutQuery(c, update)
+	locale := update.PreCheckoutQuery.From.LanguageCode
+	acceptCheckout, errorMessage, err := controller.validatePreCheckoutQuery(c, update, locale)
 	if err != nil {
 		HandlerPrintf(c, "Failed to validate pre-checkout query - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to validate pre-checkout query")
@@ -146,7 +171,7 @@ func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.
 	return HandlerSendSuccess(c, fiber.StatusOK, nil)
 }
 
-func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *bot.Update) (bool, *string, error) {
+func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *bot.Update, locale string) (bool, *string, error) {
 	price, err := controller.getTicketPrice(c)
 	if err != nil {
 		HandlerPrintf(c, "Failed to get ticket price - %v", err)
@@ -154,23 +179,35 @@ func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *
 	}
 
 	if price == nil {
-		message := "Ticket price is not set"
+		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_PRICE_NOT_SET", locale, translation.TemplateData{})
+		if err != nil {
+			return false, nil, err
+		}
 		return false, &message, nil
 	}
 
 	if update.PreCheckoutQuery.Currency != price.Currency {
-		message := "Incorrect currency"
+		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_INVALID_CURRENCY", locale, translation.TemplateData{})
+		if err != nil {
+			return false, nil, err
+		}
 		return false, &message, nil
 	}
 
 	if update.PreCheckoutQuery.TotalAmount != price.Price {
-		message := "Incorrect total price"
+		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_INVALID_PRICE", locale, translation.TemplateData{})
+		if err != nil {
+			return false, nil, err
+		}
 		return false, &message, nil
 	}
 
 	ticketCode, err := uuid.Parse(update.PreCheckoutQuery.InvoicePayload)
 	if err != nil {
-		message := "Incorrect ticket code"
+		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_INVALID_TICKET", locale, translation.TemplateData{})
+		if err != nil {
+			return false, nil, err
+		}
 		return false, &message, nil
 	}
 
@@ -181,7 +218,10 @@ func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *
 	}
 
 	if ticket != nil {
-		message := "Ticket already purchased"
+		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_TICKET_SOLD", locale, translation.TemplateData{})
+		if err != nil {
+			return false, nil, err
+		}
 		return false, &message, nil
 	}
 
@@ -194,8 +234,6 @@ type TicketPrice struct {
 }
 
 func (controller *BotController) getTicketPrice(c *fiber.Ctx) (*TicketPrice, error) {
-	result := TicketPrice{}
-
 	currency, err := controller.ConfigRepository.GetValue(TICKET_CURRENCY_KEY)
 	if err != nil {
 		return nil, err
@@ -221,46 +259,124 @@ func (controller *BotController) getTicketPrice(c *fiber.Ctx) (*TicketPrice, err
 		return nil, err
 	}
 
-	result.Currency = *currency
-	result.Price = price
+	result := TicketPrice{
+		Currency: *currency,
+		Price:    price,
+	}
 
 	return &result, nil
 }
 
-func (controller *BotController) buildWelcomeMessage() (string, bot.SendMessageOptions) {
-	message := "Let's start the tour!🎧\nPlease choose an option below to proceed"
+func (controller *BotController) buildWelcomeMessage(locale string) (string, bot.SendMessageOptions, error) {
+	message, err := controller.TranslationProvider.TranslateMessage("MESSAGE_WELCOME", locale, translation.TemplateData{})
+	if err != nil {
+		return "", bot.SendMessageOptions{}, err
+	}
+
+	startText, err := controller.TranslationProvider.TranslateMessage("BUTTON_START_TOUR", locale, translation.TemplateData{})
+	if err != nil {
+		return "", bot.SendMessageOptions{}, err
+	}
+
+	buyTicketText, err := controller.TranslationProvider.TranslateMessage("BUTTON_BUY_TICKET", locale, translation.TemplateData{})
+	if err != nil {
+		return "", bot.SendMessageOptions{}, err
+	}
+
 	appURL := controller.WebAppURL
 	callbackQuery := BUY_TICKET_QUERY
 	opts := bot.SendMessageOptions{
 		InlineKeyboard: &bot.InlineKeyboardMarkup{
 			Markup: [][]bot.InlineKeyboardButton{{
-				{Text: "Start the tour", WebAppURL: &appURL},
+				{Text: startText, WebAppURL: &appURL},
 			}, {
-				{Text: "Buy a ticket", CallbackData: &callbackQuery},
+				{Text: buyTicketText, CallbackData: &callbackQuery},
 			}},
 		},
 	}
 
-	return message, opts
+	return message, opts, nil
 }
 
-func (controller *BotController) buildPurchaseMessage(ticketCode uuid.UUID) (string, bot.SendMessageOptions) {
+func (controller *BotController) buildPurchaseMessage(locale string, ticketCode uuid.UUID) (string, bot.SendMessageOptions, error) {
 	ticketString := ticketCode.String()
-	message := "Thank you for your purchase!\nYour ticket number: " + ticketString + "\nPlease tap the button below to proceed"
+	message, err := controller.TranslationProvider.TranslateMessage("MESSAGE_PURCHASED_TICKET", locale, translation.TemplateData{"TICKET_CODE": ticketString})
+	if err != nil {
+		return "", bot.SendMessageOptions{}, err
+	}
+
+	startText, err := controller.TranslationProvider.TranslateMessage("BUTTON_START_TOUR", locale, translation.TemplateData{})
+	if err != nil {
+		return "", bot.SendMessageOptions{}, err
+	}
+
 	appURL := controller.WebAppURL + "?ticket=" + ticketString
 	opts := bot.SendMessageOptions{
 		InlineKeyboard: &bot.InlineKeyboardMarkup{
 			Markup: [][]bot.InlineKeyboardButton{{
-				{Text: "Start the tour", WebAppURL: &appURL},
+				{Text: startText, WebAppURL: &appURL},
 			}},
 		},
 	}
 
-	return message, opts
+	return message, opts, nil
 }
 
-func (controller *BotController) buildPaymentsDisabledMessage() (string, bot.SendMessageOptions) {
-	message := "Sorry, payments are currently not available. Please try again later."
+func (controller *BotController) buildPaymentsDisabledMessage(locale string) (string, bot.SendMessageOptions, error) {
+	message, err := controller.TranslationProvider.TranslateMessage("MESSAGE_PAYMENTS_NOT_AVAILABLE", locale, translation.TemplateData{})
+	if err != nil {
+		return "", bot.SendMessageOptions{}, err
+	}
 
-	return message, bot.SendMessageOptions{}
+	return message, bot.SendMessageOptions{}, nil
+}
+
+type InvoiceData struct {
+	Title       string
+	Description string
+	Price       bot.InvoicePrice
+	Options     bot.SendInvoiceOptions
+}
+
+func (controller *BotController) buildInvoiceData(locale string, price TicketPrice) (InvoiceData, error) {
+	title, err := controller.TranslationProvider.TranslateMessage("PAYMENT_TICKET_TITLE", locale, translation.TemplateData{})
+	if err != nil {
+		return InvoiceData{}, err
+	}
+
+	description, err := controller.TranslationProvider.TranslateMessage("PAYMENT_TICKET_DESCRIPTION", locale, translation.TemplateData{})
+	if err != nil {
+		return InvoiceData{}, err
+	}
+
+	priceLabel, err := controller.TranslationProvider.TranslateMessage("PAYMENT_TICKET_PRICE_PART_PRICE", locale, translation.TemplateData{})
+	if err != nil {
+		return InvoiceData{}, err
+	}
+
+	payText, err := controller.TranslationProvider.TranslateMessage("BUTTON_PAY", locale, translation.TemplateData{})
+	if err != nil {
+		return InvoiceData{}, err
+	}
+
+	pay := true
+	opts := bot.SendInvoiceOptions{
+		InlineKeyboard: &bot.InlineKeyboardMarkup{
+			Markup: [][]bot.InlineKeyboardButton{{
+				{Text: payText, Pay: &pay},
+			}},
+		},
+	}
+
+	data := InvoiceData{
+		Title:       title,
+		Description: description,
+		Price: bot.InvoicePrice{
+			Currency: price.Currency,
+			Parts:    []bot.PricePart{{Label: priceLabel, Amount: price.Price}},
+		},
+		Options: opts,
+	}
+
+	return data, nil
 }

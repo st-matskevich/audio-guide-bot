@@ -15,34 +15,7 @@ func (interactor *TelegramBotProvider) SendMessage(chatID int64, text string, op
 	opts := &gotgbot.SendMessageOpts{}
 
 	if options.InlineKeyboard != nil {
-		markup := [][]gotgbot.InlineKeyboardButton{}
-		for _, row := range options.InlineKeyboard.Markup {
-			inlineRow := []gotgbot.InlineKeyboardButton{}
-			for _, button := range row {
-				inlineButton := gotgbot.InlineKeyboardButton{
-					Text: button.Text,
-				}
-
-				if button.URL != nil {
-					inlineButton.Url = *button.URL
-				}
-
-				if button.WebAppURL != nil {
-					inlineButton.WebApp = &gotgbot.WebAppInfo{Url: *button.WebAppURL}
-				}
-
-				if button.CallbackData != nil {
-					inlineButton.CallbackData = *button.CallbackData
-				}
-
-				inlineRow = append(inlineRow, inlineButton)
-			}
-			markup = append(markup, inlineRow)
-		}
-
-		opts.ReplyMarkup = gotgbot.InlineKeyboardMarkup{
-			InlineKeyboard: markup,
-		}
+		opts.ReplyMarkup = interactor.buildKeyboard(*options.InlineKeyboard)
 	}
 
 	if _, err := interactor.Bot.SendMessage(chatID, text, opts); err != nil {
@@ -83,17 +56,57 @@ func (interactor *TelegramBotProvider) AnswerPreCheckoutQuery(queryID string, ok
 	return nil
 }
 
-func (interactor *TelegramBotProvider) SendInvoice(chatID int64, title string, description string, payload string, price InvoicePrice) error {
+func (interactor *TelegramBotProvider) SendInvoice(chatID int64, title string, description string, payload string, price InvoicePrice, options SendInvoiceOptions) error {
 	labeledPrice := []gotgbot.LabeledPrice{}
 	for _, part := range price.Parts {
 		labeledPrice = append(labeledPrice, gotgbot.LabeledPrice{Label: part.Label, Amount: part.Amount})
 	}
 
-	if _, err := interactor.Bot.SendInvoice(chatID, title, description, payload, interactor.PaymentsToken, price.Currency, labeledPrice, nil); err != nil {
+	opts := &gotgbot.SendInvoiceOpts{}
+	if options.InlineKeyboard != nil {
+		opts.ReplyMarkup = interactor.buildKeyboard(*options.InlineKeyboard)
+	}
+
+	if _, err := interactor.Bot.SendInvoice(chatID, title, description, payload, interactor.PaymentsToken, price.Currency, labeledPrice, opts); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (interactor *TelegramBotProvider) buildKeyboard(keyboard InlineKeyboardMarkup) gotgbot.InlineKeyboardMarkup {
+	markup := [][]gotgbot.InlineKeyboardButton{}
+	for _, row := range keyboard.Markup {
+		inlineRow := []gotgbot.InlineKeyboardButton{}
+		for _, button := range row {
+			inlineButton := gotgbot.InlineKeyboardButton{
+				Text: button.Text,
+			}
+
+			if button.URL != nil {
+				inlineButton.Url = *button.URL
+			}
+
+			if button.WebAppURL != nil {
+				inlineButton.WebApp = &gotgbot.WebAppInfo{Url: *button.WebAppURL}
+			}
+
+			if button.CallbackData != nil {
+				inlineButton.CallbackData = *button.CallbackData
+			}
+
+			if button.Pay != nil {
+				inlineButton.Pay = *button.Pay
+			}
+
+			inlineRow = append(inlineRow, inlineButton)
+		}
+		markup = append(markup, inlineRow)
+	}
+
+	return gotgbot.InlineKeyboardMarkup{
+		InlineKeyboard: markup,
+	}
 }
 
 func CreateTelegramBotProvider(botToken string, paymentsToken string) (BotProvider, error) {

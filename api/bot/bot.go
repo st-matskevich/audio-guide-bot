@@ -9,6 +9,7 @@ type InlineKeyboardButton struct {
 	URL          *string
 	WebAppURL    *string
 	CallbackData *string
+	Pay          *bool
 }
 
 type InlineKeyboardMarkup struct {
@@ -16,6 +17,10 @@ type InlineKeyboardMarkup struct {
 }
 
 type SendMessageOptions struct {
+	InlineKeyboard *InlineKeyboardMarkup
+}
+
+type SendInvoiceOptions struct {
 	InlineKeyboard *InlineKeyboardMarkup
 }
 
@@ -37,5 +42,5 @@ type BotProvider interface {
 	SendMessage(chatID int64, text string, options SendMessageOptions) error
 	AnswerCallbackQuery(queryID string) error
 	AnswerPreCheckoutQuery(queryID string, ok bool, options AnswerPreCheckoutQueryOptions) error
-	SendInvoice(chatID int64, title string, description string, payload string, price InvoicePrice) error
+	SendInvoice(chatID int64, title string, description string, payload string, price InvoicePrice, options SendInvoiceOptions) error
 }

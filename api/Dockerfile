@@ -26,6 +26,7 @@ COPY --from=builder ["/build/main", "/"]
 
 # Copy migrations
 COPY ./db/migrations /migrations
+COPY ./translation/locales /locales
 
 # Command to run when starting the container.
 ENTRYPOINT ["/main"]
