@@ -23,6 +23,7 @@ Helpers are used to decouple and isolate APIs from React:
 - [auth.js](./src/api/auth.js) - implements token storage and refresh logic
 - [telegram.js](./src/api/telegram.js) - wrapper for Telegram APIs calls
 - [guide.js](./src/api/guide.js) - wrapper for Guide APIs calls
+- [i18n.js](./src/api/i18n.js) - wrapper for localization package
 - [utils.js](./src/api/utils.js) - small miscellaneous functions
 
 ## nginx configuration in the production image

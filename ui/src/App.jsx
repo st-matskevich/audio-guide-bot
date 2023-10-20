@@ -5,6 +5,7 @@ import { addTokenListener, removeTokenListener } from "./api/auth";
 import ObjectViewerComponent from "./components/ObjectViewerComponent";
 import { isTelegramAPISupported } from "./api/telegram";
 import RippleContainer from "./components/RippleContainer";
+import { i18n } from "./api/i18n";
 
 function App() {
     const isSupported = isTelegramAPISupported();
@@ -66,9 +67,9 @@ function App() {
         if (!isSupported) {
             return (
                 <div className="scanner-wrapper">
-                    <span>Your Telegram version is not supported.</span>
-                    <span>Please update to the latest one.</span>
-                    <RippleContainer className="button" onClick={onCloseClicked}>Close app</RippleContainer>
+                    <span>{i18n.t("MESSAGE_NOT_SUPPORTED_LINE_1")}</span>
+                    <span>{i18n.t("MESSAGE_NOT_SUPPORTED_LINE_2")}</span>
+                    <RippleContainer className="button" onClick={onCloseClicked}>{i18n.t("BUTTON_CLOSE_APP")}</RippleContainer>
                 </div>
             );
         }
@@ -77,19 +78,17 @@ function App() {
         } else if (tokenState.token == null) {
             return (
                 <div className="scanner-wrapper">
-                    {/* TODO: fix with proper i18n */}
-                    {/* eslint-disable-next-line react/no-unescaped-entities */}
-                    <span>It seems you haven't purchased a ticket yet.</span>
-                    <span>To start our tour, please go back to the bot and buy a ticket.</span>
-                    <RippleContainer className="button" onClick={onCloseClicked}>Close app</RippleContainer>
+                    <span>{i18n.t("MESSAGE_NO_TICKET_LINE_1")}</span>
+                    <span>{i18n.t("MESSAGE_NO_TICKET_LINE_2")}</span>
+                    <RippleContainer className="button" onClick={onCloseClicked}>{i18n.t("BUTTON_CLOSE_APP")}</RippleContainer>
                 </div>
             );
         } else if (scannedObject == null) {
             return (
                 <div className="scanner-wrapper">
-                    <span>Welcome to the tour!</span>
-                    <span>Scan QR codes to start listening.</span>
-                    <RippleContainer className="button" onClick={onScanQRClicked}>Scan QR</RippleContainer>
+                    <span>{i18n.t("MESSAGE_WELCOME_LINE_1")}</span>
+                    <span>{i18n.t("MESSAGE_WELCOME_LINE_2")}</span>
+                    <RippleContainer className="button" onClick={onScanQRClicked}>{i18n.t("BUTTON_SCAN_QR")}</RippleContainer>
                 </div>
             );
         } else {

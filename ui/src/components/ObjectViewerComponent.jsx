@@ -1,15 +1,16 @@
 import "./ObjectViewerComponent.css";
 import "./CommonStyles.css";
-import MarqueeComponent from "./MarqueeComponent";
 import PlayIcon from "../assets/play.svg?react";
 import PauseIcon from "../assets/pause.svg?react";
 import QRIcon from "../assets/qr-code.svg?react";
 import { useRef, useState, useEffect } from "react";
 import { getObjectAudioURL, getObjectCoverURL, getObjectData } from "../api/guide";
+import { i18n } from "../api/i18n";
 import SliderComponent from "./SliderComponent";
 import RippleContainer from "./RippleContainer";
 import ImageComponent from "./ImageComponent";
 import CarouselComponent from "./CarouselContainer";
+import MarqueeComponent from "./MarqueeComponent";
 
 function ObjectViewerComponent(props) {
     const { accessToken, objectCode } = props;
@@ -85,7 +86,7 @@ function ObjectViewerComponent(props) {
                     height="31"
                     fill="var(--tg-theme-button-text-color)"
                     stroke="var(--tg-theme-button-text-color)"
-                    alt="pause guide"
+                    alt={i18n.t("ALT_PAUSE_GUIDE")}
                 />
             );
         } else {
@@ -95,7 +96,7 @@ function ObjectViewerComponent(props) {
                     height="31"
                     fill="var(--tg-theme-button-text-color)"
                     stroke="var(--tg-theme-button-text-color)"
-                    alt="play guide"
+                    alt={i18n.t("ALT_PLAY_GUIDE")}
                 />
             );
         }
@@ -107,18 +108,18 @@ function ObjectViewerComponent(props) {
         } else if (objectData.error != null) {
             return (
                 <div className="object-viewer-wrapper">
-                    <span>{"An error occurred while loading object: "}</span>
+                    <span>{i18n.t("ERROR_OBJECT_LOAD_FAILED")}</span>
                     <span>{objectData.error}</span>
-                    <RippleContainer className="button" onClick={onScanQRClicked}>Scan QR</RippleContainer>
+                    <RippleContainer className="button" onClick={onScanQRClicked}>{i18n.t("BUTTON_SCAN_QR")}</RippleContainer>
                 </div>
             );
         } else {
             return (
                 <div className="object-viewer-wrapper">
-                    <CarouselComponent className="image-viewer">
+                    <CarouselComponent className="image-viewer" alt={{left: i18n.t("ALT_NAVIGATE_LEFT"), right: i18n.t("ALT_NAVIGATE_RIGHT")}}>
                         {objectData.data.covers.map((cover) => {
                             return (
-                                <ImageComponent key={cover.index} src={getObjectCoverURL(accessToken, objectData.code, cover.index)} alt="cover" />
+                                <ImageComponent key={cover.index} src={getObjectCoverURL(accessToken, objectData.code, cover.index)} alt={i18n.t("ALT_OBJECT_COVER")} />
                             );
                         })}
                     </CarouselComponent>
@@ -132,7 +133,7 @@ function ObjectViewerComponent(props) {
                                 height="31"
                                 fill="var(--tg-theme-button-text-color)"
                                 stroke="var(--tg-theme-button-text-color)"
-                                alt="scan qr code"
+                                alt={i18n.t("ALT_SCAN_QR")}
                             />
                         </RippleContainer>
                         <RippleContainer className="icon-button" onClick={onToggleAudioPlay}>
