@@ -1,0 +1,17 @@
+{
+    "MESSAGE_NOT_SUPPORTED_LINE_1": "Your Telegram version is not supported.",
+    "MESSAGE_NOT_SUPPORTED_LINE_2": "Please update to the latest one.",
+    "MESSAGE_NO_TICKET_LINE_1": "It seems you haven't purchased a ticket yet.",
+    "MESSAGE_NO_TICKET_LINE_2": "To start our tour, please go back to the bot and buy a ticket.",
+    "BUTTON_CLOSE_APP": "Close app",
+    "MESSAGE_WELCOME_LINE_1": "Welcome to the tour!",
+    "MESSAGE_WELCOME_LINE_2": "Scan QR codes to start listening.",
+    "BUTTON_SCAN_QR": "Scan QR",
+    "ERROR_OBJECT_LOAD_FAILED": "An error occurred while loading object:",
+    "ALT_NAVIGATE_LEFT": "navigate to left cover",
+    "ALT_NAVIGATE_RIGHT": "navigate to right cover",
+    "ALT_OBJECT_COVER": "cover image",
+    "ALT_PLAY_GUIDE": "play audio guide",
+    "ALT_PAUSE_GUIDE": "pause audio guide",
+    "ALT_SCAN_QR": "scan qr code"
+}

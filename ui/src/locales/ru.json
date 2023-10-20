@@ -1,0 +1,17 @@
+{
+    "MESSAGE_NOT_SUPPORTED_LINE_1": "Ваша версия Telegram не поддерживается.",
+    "MESSAGE_NOT_SUPPORTED_LINE_2": "Пожалуйста, обновитесь до последней версии.",
+    "MESSAGE_NO_TICKET_LINE_1": "Кажется, вы еще не купили билет.",
+    "MESSAGE_NO_TICKET_LINE_2": "Чтобы начать нашу экскурсию, пожалуйста, вернитесь в бот и купите билет.",
+    "BUTTON_CLOSE_APP": "Закрыть приложение",
+    "MESSAGE_WELCOME_LINE_1": "Добро пожаловать на тур!",
+    "MESSAGE_WELCOME_LINE_2": "Сканируйте QR-коды, чтобы начать слушать.",
+    "BUTTON_SCAN_QR": "Сканировать QR-код",
+    "ERROR_OBJECT_LOAD_FAILED": "Произошла ошибка при загрузке объекта:",
+    "ALT_NAVIGATE_LEFT": "перейти к левой обложке",
+    "ALT_NAVIGATE_RIGHT": "перейти к правой обложке",
+    "ALT_OBJECT_COVER": "изображение обложки",
+    "ALT_PLAY_GUIDE": "воспроизвести аудиогид",
+    "ALT_PAUSE_GUIDE": "приостановить аудиогид",
+    "ALT_SCAN_QR": "сканировать qr-код"
+}

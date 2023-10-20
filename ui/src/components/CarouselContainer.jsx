@@ -4,7 +4,7 @@ import LeftIcon from "../assets/left.svg?react";
 import RightIcon from "../assets/right.svg?react";
 
 function CarouselContainer(props) {
-    const { className, children } = props;
+    const { className, children, alt } = props;
     const [activePage, setActivePage] = useState(0);
     const containerRef = useRef();
 
@@ -63,7 +63,7 @@ function CarouselContainer(props) {
                     <LeftIcon
                         width="20"
                         height="20"
-                        alt="navigate left"
+                        alt={alt.left}
                     />
                 </div>
             )}
@@ -72,7 +72,7 @@ function CarouselContainer(props) {
                     <RightIcon
                         width="20"
                         height="20"
-                        alt="navigate right"
+                        alt={alt.right}
                     />
                 </div>
             )}
