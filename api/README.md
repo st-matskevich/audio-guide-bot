@@ -16,11 +16,11 @@ Optional environment variables:
 ## Service structure
 Service is built on three abstractions:
 - Providers - isolate interaction with other systems or packages
-    - [auth](./provider/auth/auth.go) - provides functionality for token-based authentication, implementations: [JWT](./provider/auth/jwt.go)
-    - [blob](./provider/blob/blob.go) - provides I/O operations on immutable binary objects, implementations: [S3](./provider/blob/s3.go)
-    - [bot](./provider/bot/bot.go) - provides interaction with Bot API, implementations: [Telegram API](./provider/bot/telegram.go)
-    - [db](./provider/db/db.go) - provides interaction with a database, implementations: [PostgreSQL](./provider/db/postgres.go)
-    - [translation](./provider/translation/translation.go) - provides strings translations, implementations: [go-i18n](./provider/translation/i18n.go)
+    - [provider/auth](./provider/auth/auth.go) - provides functionality for token-based authentication, implementations: [JWT](./provider/auth/jwt.go)
+    - [provider/blob](./provider/blob/blob.go) - provides I/O operations on immutable binary objects, implementations: [S3](./provider/blob/s3.go)
+    - [provider/bot](./provider/bot/bot.go) - provides interaction with Bot API, implementations: [Telegram API](./provider/bot/telegram.go)
+    - [provider/db](./provider/db/db.go) - provides interaction with a database, implementations: [PostgreSQL](./provider/db/postgres.go)
+    - [provider/translation](./provider/translation/translation.go) - provides strings translations, implementations: [go-i18n](./provider/translation/i18n.go)
 - Repositories - provide CRUD operations for data types, all interfaces are implemented as an aggregate [repository](./repository/repository.go) object
     - [repository/object](./repository/object.go) - implements CRUD operations for Object type
     - [repository/ticket](./repository/ticket.go) - implements CRUD operations for Ticket type
