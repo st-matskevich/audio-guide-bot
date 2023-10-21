@@ -7,13 +7,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/st-matskevich/audio-guide-bot/api/auth"
-	"github.com/st-matskevich/audio-guide-bot/api/blob"
-	"github.com/st-matskevich/audio-guide-bot/api/bot"
 	"github.com/st-matskevich/audio-guide-bot/api/controller"
-	"github.com/st-matskevich/audio-guide-bot/api/db"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/auth"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/blob"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/bot"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/db"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/translation"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
-	"github.com/st-matskevich/audio-guide-bot/api/translation"
 )
 
 func main() {

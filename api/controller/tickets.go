@@ -5,7 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/st-matskevich/audio-guide-bot/api/auth"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/auth"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
 )
 

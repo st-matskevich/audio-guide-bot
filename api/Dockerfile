@@ -25,8 +25,8 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder ["/build/main", "/"]
 
 # Copy migrations
-COPY ./db/migrations /migrations
-COPY ./translation/locales /locales
+COPY ./provider/db/migrations /migrations
+COPY ./provider/translation/locales /locales
 
 # Command to run when starting the container.
 ENTRYPOINT ["/main"]

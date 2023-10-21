@@ -5,9 +5,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/st-matskevich/audio-guide-bot/api/bot"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/bot"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/translation"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
-	"github.com/st-matskevich/audio-guide-bot/api/translation"
 )
 
 const BUY_TICKET_QUERY = "buy_ticket"
