@@ -1,0 +1,46 @@
+.button-wrapper {
+    border-radius: 5px;
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    user-select: none;
+    width: 90%;
+    margin: 15px 8px 8px;
+    cursor: pointer;
+
+    appearance: none;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0;
+    overflow: hidden;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+.button-content {
+    width: 100%;
+    height: 100%;
+    padding: 10px 25px;
+    box-sizing: border-box;
+}
+
+.icon.button-wrapper {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    margin: 10px 25px;
+}
+
+.icon.button-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.icon.button-content>* {
+    width: 31px;
+    height: 31px;
+    fill: var(--tg-theme-button-text-color);
+    stroke: var(--tg-theme-button-text-color);
+}

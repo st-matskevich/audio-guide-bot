@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { addTokenListener, removeTokenListener } from "./api/auth";
 import ObjectViewerComponent from "./components/ObjectViewerComponent";
 import { isTelegramAPISupported } from "./api/telegram";
-import RippleContainer from "./components/RippleContainer";
 import { i18n } from "./api/i18n";
+import { ButtonComponent } from "./components/ButtonComponents";
 
 function App() {
     const isSupported = isTelegramAPISupported();
@@ -69,7 +69,7 @@ function App() {
                 <div className="scanner-wrapper">
                     <span>{i18n.t("MESSAGE_NOT_SUPPORTED_LINE_1")}</span>
                     <span>{i18n.t("MESSAGE_NOT_SUPPORTED_LINE_2")}</span>
-                    <RippleContainer className="button" onClick={onCloseClicked}>{i18n.t("BUTTON_CLOSE_APP")}</RippleContainer>
+                    <ButtonComponent onClick={onCloseClicked}>{i18n.t("BUTTON_CLOSE_APP")}</ButtonComponent>
                 </div>
             );
         }
@@ -80,7 +80,7 @@ function App() {
                 <div className="scanner-wrapper">
                     <span>{i18n.t("MESSAGE_NO_TICKET_LINE_1")}</span>
                     <span>{i18n.t("MESSAGE_NO_TICKET_LINE_2")}</span>
-                    <RippleContainer className="button" onClick={onCloseClicked}>{i18n.t("BUTTON_CLOSE_APP")}</RippleContainer>
+                    <ButtonComponent onClick={onCloseClicked}>{i18n.t("BUTTON_CLOSE_APP")}</ButtonComponent>
                 </div>
             );
         } else if (scannedObject == null) {
@@ -88,7 +88,7 @@ function App() {
                 <div className="scanner-wrapper">
                     <span>{i18n.t("MESSAGE_WELCOME_LINE_1")}</span>
                     <span>{i18n.t("MESSAGE_WELCOME_LINE_2")}</span>
-                    <RippleContainer className="button" onClick={onScanQRClicked}>{i18n.t("BUTTON_SCAN_QR")}</RippleContainer>
+                    <ButtonComponent onClick={onScanQRClicked}>{i18n.t("BUTTON_SCAN_QR")}</ButtonComponent>
                 </div>
             );
         } else {

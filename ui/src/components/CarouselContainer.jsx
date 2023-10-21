@@ -59,22 +59,22 @@ function CarouselContainer(props) {
             </div>
             {getPaginator()}
             {canNavigateLeft && (
-                <div className='carousel-navigator left' onClick={onNavigateLeft}>
+                <button className='carousel-navigator left' onClick={onNavigateLeft}>
                     <LeftIcon
                         width="20"
                         height="20"
                         alt={alt.left}
                     />
-                </div>
+                </button>
             )}
             {canNavigateRight && (
-                <div className='carousel-navigator right' onClick={onNavigateRight}>
+                <button className='carousel-navigator right' onClick={onNavigateRight}>
                     <RightIcon
                         width="20"
                         height="20"
                         alt={alt.right}
                     />
-                </div>
+                </button>
             )}
         </div>
     );

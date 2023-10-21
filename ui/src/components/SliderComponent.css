@@ -1,17 +1,15 @@
 .range-input {
     --progress: 0;
-    -webkit-appearance: none;
     appearance: none;
-    outline: none;
     height: 2px;
     margin: 13px 10px;
     background: linear-gradient(to right, var(--tg-theme-button-color) var(--progress), var(--tg-theme-hint-color) var(--progress));
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    outline-offset: 5px;
 }
 
 .range-input::-webkit-slider-thumb {
-    -webkit-appearance: none;
     appearance: none;
     height: 16px;
     width: 16px;
