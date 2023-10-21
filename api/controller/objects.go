@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/st-matskevich/audio-guide-bot/api/auth"
-	"github.com/st-matskevich/audio-guide-bot/api/blob"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/auth"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/blob"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
 )
 
