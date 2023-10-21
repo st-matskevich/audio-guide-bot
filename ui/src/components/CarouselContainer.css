@@ -60,6 +60,10 @@
     background-color: white;
     border-radius: 50%;
 
+    border: none;
+    appearance: none;
+    padding: 0;
+
     display: flex;
     justify-content: center;
     align-items: center;
