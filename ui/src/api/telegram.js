@@ -1,25 +1,7 @@
 const MIN_TELEGRAM_BOT_API = "6.9";
 
-const isVersionGreaterOrEqual = (versionA, versionB) => {
-    const vAParts = versionA.split(".").map(Number);
-    const vBParts = versionB.split(".").map(Number);
-
-    for (let i = 0; i < Math.min(vAParts.length, vBParts.length); i++) {
-        const partA = vAParts[i];
-        const partB = vBParts[i];
-
-        if (partA < partB) {
-            return false;
-        } else if (partA > partB) {
-            return true;
-        }
-    }
-
-    return true;
-};
-
 export const isTelegramAPISupported = () => {
-    return isVersionGreaterOrEqual(window.Telegram.WebApp.version, MIN_TELEGRAM_BOT_API);
+    return window.Telegram.WebApp.isVersionAtLeast(MIN_TELEGRAM_BOT_API);
 };
 
 export const getCloudValue = (key) => {
