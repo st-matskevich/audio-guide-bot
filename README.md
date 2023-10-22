@@ -8,7 +8,7 @@ Bot supports only mobile Telegram clients with Telegram Bot API version of at le
 Payments are working in test mode. Transactions must be made using test cards like `4242 4242 4242 4242`, other cards can be found in [payments provider docs](https://guide.tranzzo.com/docs/testing/cards/).  
 QR codes for the bot can be found in [/admin/test-data](/admin/test-data).
 
-![qrs](https://github.com/st-matskevich/audio-guide-bot/assets/62443731/b427cefb-2847-499a-8f10-e3d63d78dd1f)
+![qrs](https://github.com/st-matskevich/audio-guide-bot/assets/62443731/23d27334-cf2c-4965-9013-f5c3d1fa0acf)
 ![demo](https://github.com/st-matskevich/audio-guide-bot/assets/62443731/80de5c0f-2a8a-4f0b-a8fb-6da7f0b78123)
 
 ## Features
