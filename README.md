@@ -139,17 +139,21 @@ To configure the Guide Bot you need:
 
 To create an object in the Guide Bot you need:
 1. Prepare the data
-    - **Title**: string that will be displayed as a title of the object. It must not exceed 64 characters
+    - **Title**: string that will be displayed as a title of the object. It must not exceed 64 characters. Title string can be added in different languanges to provide translations for users.
     - **Code**: string that will be encoded in a QR code to access your object
     - **Covers**: collection of image files that will be displayed while listening to the Guide. Amount of covers is not limited. Cover image can be any size but will be cropped to 1:1 proportions to fit in the UI. Also, keep in mind that a large size slows down the loading of the object.
-    - **Audio**: audio file that will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object.
+    - **Audio**: audio file that will be played when viewing the object. It can be any size, but keep in mind that a large size slows down the loading of the object. Audio file can be added in different languanges to provide translations for users.
 0. Connect to the S3 bucket using S3 management tool
 0. Upload **Covers** and **Audio** to the bucket and save paths to the uploaded files. Make sure to include the original file extension in the file name otherwise, some clients will not be able to play audio tracks.
 0. Connect to the DB using DB management tool
 0. Create a new row in the `objects` table
     - Set `code` to the value of  **Code**
-    - Set `title` to the value of  **Title**
-    - Set `audio` to the path of the uploaded file **Audio**
+0. Create a new row in the `objects_i18n` table
+    - For each language (at least data for `en` language **must be** provided):
+      - Set `object_id` to the id of the row created in the previous step
+      - Set `language` to language code in [ISO 639-1 format](https://en.wikipedia.org/wiki/ISO_639-1)
+      - Set `title` to the value of **Title** in the specified language
+      - Set `audio_path` to the path of the uploaded file **Audio** in the specified language
 0. Create a new row in the `covers` table for each uploaded file from **Covers** collection
     - Set `object_id` to the id of the row created in the previous step
     - Set `index` to the number indicating the order in which the picture will be displayed

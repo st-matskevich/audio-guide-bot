@@ -4,6 +4,10 @@ export const isTelegramAPISupported = () => {
     return window.Telegram.WebApp.isVersionAtLeast(MIN_TELEGRAM_BOT_API);
 };
 
+export const getTelegramLanguage = () => {
+    return window.Telegram.WebApp.initDataUnsafe.user.language_code;
+};
+
 export const getCloudValue = (key) => {
     return new Promise((resolve, reject) => {
         window.Telegram.WebApp.CloudStorage.getItem(key, (err, value) => {

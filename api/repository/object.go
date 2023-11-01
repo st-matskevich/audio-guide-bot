@@ -14,11 +14,17 @@ type Object struct {
 }
 
 type ObjectRepository interface {
-	GetObject(code string) (*Object, error)
+	GetObject(code string, language string) (*Object, error)
 }
 
-func (repository *Repository) GetObject(code string) (*Object, error) {
-	reader, err := repository.DBProvider.Query("SELECT object_id, title, audio_path FROM objects WHERE code = $1", code)
+func (repository *Repository) GetObject(code string, language string) (*Object, error) {
+	reader, err := repository.DBProvider.Query(
+		`SELECT objects.object_id, objects_i18n.title, objects_i18n.audio_path FROM objects
+		JOIN objects_i18n ON objects.object_id = objects_i18n.object_id
+		WHERE objects.code = $1
+		AND objects_i18n.language = $2`,
+		code, language)
+
 	if err != nil {
 		return nil, err
 	}
