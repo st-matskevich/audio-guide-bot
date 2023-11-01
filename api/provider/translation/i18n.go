@@ -26,7 +26,7 @@ func (provider *I18NTranslationProvider) TranslateMessage(messageID string, loca
 }
 
 func CreateI18NTranslationProvider() (TranslationProvider, error) {
-	bundle := i18n.NewBundle(language.English)
+	bundle := i18n.NewBundle(DEFAULT_LANGUAGE)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
 	locales := []string{

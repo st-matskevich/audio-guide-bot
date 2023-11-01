@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/st-matskevich/audio-guide-bot/api/provider/auth"
 	"github.com/st-matskevich/audio-guide-bot/api/provider/blob"
+	"github.com/st-matskevich/audio-guide-bot/api/provider/translation"
 	"github.com/st-matskevich/audio-guide-bot/api/repository"
 )
 
@@ -54,7 +55,8 @@ func (controller *ObjectsController) HandleGetObject(c *fiber.Ctx) error {
 	}
 
 	objectCode := c.Params("code")
-	object, err := controller.ObjectRepository.GetObject(objectCode)
+	language := c.Query("language")
+	object, err := controller.getObject(c, objectCode, language)
 	if err != nil {
 		HandlerPrintf(c, "Failed to get object - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
@@ -85,7 +87,8 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 	}
 
 	objectCode := c.Params("code")
-	object, err := controller.ObjectRepository.GetObject(objectCode)
+	language := c.Query("language")
+	object, err := controller.getObject(c, objectCode, language)
 	if err != nil {
 		HandlerPrintf(c, "Failed to get object - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
@@ -144,7 +147,8 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 	}
 
 	objectCode := c.Params("code")
-	object, err := controller.ObjectRepository.GetObject(objectCode)
+	language := c.Query("language")
+	object, err := controller.getObject(c, objectCode, language)
 	if err != nil {
 		HandlerPrintf(c, "Failed to get object - %v", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
@@ -207,6 +211,25 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 
 		return c.SendStream(reader)
 	}
+}
+
+func (controller *ObjectsController) getObject(c *fiber.Ctx, code string, language string) (*repository.Object, error) {
+	object, err := controller.ObjectRepository.GetObject(code, language)
+	if err != nil {
+		return nil, err
+	}
+
+	if object == nil {
+		// fallback to default language
+		fallback := translation.DEFAULT_LANGUAGE.String()
+		HandlerPrintf(c, "Object i18n for %s not found, loading i18n for %s", language, fallback)
+		object, err = controller.ObjectRepository.GetObject(code, fallback)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return object, nil
 }
 
 func (controller *ObjectsController) parseRange(header string, size int64) (string, []blob.BlobRange, error) {
