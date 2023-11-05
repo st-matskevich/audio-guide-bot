@@ -27,18 +27,18 @@ func (controller *TicketsController) GetRoutes() []Route {
 func (controller *TicketsController) HandleExchangeTicketForToken(c *fiber.Ctx) error {
 	ticketCode, err := uuid.Parse(c.Params("code"))
 	if err != nil {
-		HandlerPrintf(c, "Failed to parse input - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to parse input", "error", err)
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse input")
 	}
 
 	active, err := controller.TicketRepository.ActivateTicket(ticketCode.String())
 	if err != nil {
-		HandlerPrintf(c, "Failed to activate ticket - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to activate ticket", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to activate ticket")
 	}
 
 	if !active {
-		HandlerPrintf(c, "Requested ticket already activated")
+		HandlerPrintf(c, LOG_WARNING, "Requested ticket already activated")
 		return HandlerSendFailure(c, fiber.StatusForbidden, "Requested ticket already activated")
 	}
 
@@ -50,7 +50,7 @@ func (controller *TicketsController) HandleExchangeTicketForToken(c *fiber.Ctx) 
 
 	tokenString, err := controller.TokenProvider.Create(claims)
 	if err != nil {
-		HandlerPrintf(c, "Failed to sign token - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to sign token", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to sign token")
 	}
 
