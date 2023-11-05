@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,7 +16,21 @@ type Route struct {
 	Handler fiber.Handler
 }
 
-func HandlerPrintf(c *fiber.Ctx, format string, v ...any) {
-	args := append([]any{c.Method(), c.Path()}, v...)
-	log.Printf("%s %s: "+format, args...)
+const (
+	LOG_INFO    = 0
+	LOG_WARNING = 1
+	LOG_ERROR   = 2
+)
+
+func HandlerPrintf(c *fiber.Ctx, severity int, message string, v ...any) {
+	logger := slog.Info
+	switch severity {
+	case LOG_WARNING:
+		logger = slog.Warn
+	case LOG_ERROR:
+		logger = slog.Error
+	}
+
+	args := append([]any{"method", c.Method(), "path", c.Path(), "request-id", c.Context().UserValue("request-id")}, v...)
+	logger(message, args...)
 }

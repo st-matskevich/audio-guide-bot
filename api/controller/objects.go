@@ -45,12 +45,12 @@ func (controller *ObjectsController) HandleGetObject(c *fiber.Ctx) error {
 	_, tokenValid, err := controller.TokenProvider.Verify(authHeader)
 
 	if err != nil {
-		HandlerPrintf(c, "Failed to parse authorization token - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to parse authorization token", "error", err)
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse authorization token")
 	}
 
 	if !tokenValid {
-		HandlerPrintf(c, "Authorization token is invalid")
+		HandlerPrintf(c, LOG_WARNING, "Authorization token is invalid")
 		return HandlerSendFailure(c, fiber.StatusUnauthorized, "Authorization token is invalid")
 	}
 
@@ -58,12 +58,12 @@ func (controller *ObjectsController) HandleGetObject(c *fiber.Ctx) error {
 	language := c.Query("language")
 	object, err := controller.getObject(c, objectCode, language)
 	if err != nil {
-		HandlerPrintf(c, "Failed to get object - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to get object", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
 	}
 
 	if object == nil {
-		HandlerPrintf(c, "Object not found")
+		HandlerPrintf(c, LOG_WARNING, "Object not found")
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
 	}
 
@@ -77,12 +77,12 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 	_, tokenValid, err := controller.TokenProvider.Verify(authHeader)
 
 	if err != nil {
-		HandlerPrintf(c, "Failed to parse authorization token - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to parse authorization token", "error", err)
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse authorization token")
 	}
 
 	if !tokenValid {
-		HandlerPrintf(c, "Authorization token is invalid")
+		HandlerPrintf(c, LOG_WARNING, "Authorization token is invalid")
 		return HandlerSendFailure(c, fiber.StatusUnauthorized, "Authorization token is invalid")
 	}
 
@@ -90,18 +90,18 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 	language := c.Query("language")
 	object, err := controller.getObject(c, objectCode, language)
 	if err != nil {
-		HandlerPrintf(c, "Failed to get object - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to get object", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
 	}
 
 	if object == nil {
-		HandlerPrintf(c, "Object not found")
+		HandlerPrintf(c, LOG_WARNING, "Object not found")
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
 	}
 
 	coverIndex, err := strconv.Atoi(c.Params("index"))
 	if err != nil {
-		HandlerPrintf(c, "Failed to parse cover index - %v", err)
+		HandlerPrintf(c, LOG_WARNING, "Failed to parse cover index", "error", err)
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse cover index")
 	}
 
@@ -114,13 +114,13 @@ func (controller *ObjectsController) HandleGetObjectCover(c *fiber.Ctx) error {
 	}
 
 	if coverPath == "" {
-		HandlerPrintf(c, "Cover not found")
+		HandlerPrintf(c, LOG_WARNING, "Cover not found")
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Cover not found")
 	}
 
 	reader, err := controller.BlobProvider.ReadBlob(coverPath, blob.ReadBlobOptions{})
 	if err != nil {
-		HandlerPrintf(c, "Blob read failed - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Blob read failed", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 	}
 
@@ -137,12 +137,12 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 	_, tokenValid, err := controller.TokenProvider.Verify(authHeader)
 
 	if err != nil {
-		HandlerPrintf(c, "Failed to parse authorization token - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to parse authorization token", "error", err)
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse authorization token")
 	}
 
 	if !tokenValid {
-		HandlerPrintf(c, "Authorization token is invalid")
+		HandlerPrintf(c, LOG_WARNING, "Authorization token is invalid")
 		return HandlerSendFailure(c, fiber.StatusUnauthorized, "Authorization token is invalid")
 	}
 
@@ -150,12 +150,12 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 	language := c.Query("language")
 	object, err := controller.getObject(c, objectCode, language)
 	if err != nil {
-		HandlerPrintf(c, "Failed to get object - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to get object", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get object")
 	}
 
 	if object == nil {
-		HandlerPrintf(c, "Object not found")
+		HandlerPrintf(c, LOG_WARNING, "Object not found")
 		return HandlerSendFailure(c, fiber.StatusNotFound, "Object not found")
 	}
 
@@ -163,23 +163,23 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 	if rangesHeader != "" {
 		blobStat, err := controller.BlobProvider.StatBlob(object.AudioPath)
 		if err != nil {
-			HandlerPrintf(c, "Blob stat failed - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Blob stat failed", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob stat failed")
 		}
 
 		units, ranges, err := controller.parseRange(rangesHeader, blobStat.Size)
 		if err != nil {
-			HandlerPrintf(c, "Failed to parse range header - %v", err)
+			HandlerPrintf(c, LOG_WARNING, "Failed to parse range header", "error", err)
 			return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse range header")
 		}
 
 		if units != "bytes" {
-			HandlerPrintf(c, "Incorrect range units - %v", units)
+			HandlerPrintf(c, LOG_WARNING, "Incorrect range units", "error", units)
 			return HandlerSendFailure(c, fiber.StatusRequestedRangeNotSatisfiable, "Incorrect range units")
 		}
 
 		if len(ranges) < 1 {
-			HandlerPrintf(c, "No ranges provided")
+			HandlerPrintf(c, LOG_WARNING, "No ranges provided")
 			return HandlerSendFailure(c, fiber.StatusRequestedRangeNotSatisfiable, "No ranges provided")
 		}
 
@@ -188,7 +188,7 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 
 		reader, err := controller.BlobProvider.ReadBlob(object.AudioPath, readOptions)
 		if err != nil {
-			HandlerPrintf(c, "Blob read failed - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Blob read failed", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 		}
 
@@ -201,7 +201,7 @@ func (controller *ObjectsController) HandleGetObjectAudio(c *fiber.Ctx) error {
 	} else {
 		reader, err := controller.BlobProvider.ReadBlob(object.AudioPath, blob.ReadBlobOptions{})
 		if err != nil {
-			HandlerPrintf(c, "Blob read failed - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Blob read failed", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Blob read failed")
 		}
 
@@ -222,7 +222,7 @@ func (controller *ObjectsController) getObject(c *fiber.Ctx, code string, langua
 	if object == nil {
 		// fallback to default language
 		fallback := translation.DEFAULT_LANGUAGE.String()
-		HandlerPrintf(c, "Object i18n for %s not found, loading i18n for %s", language, fallback)
+		HandlerPrintf(c, LOG_WARNING, "Object i18n for requested language is not found, loading i18n for fallback language", "language", language, "fallback", fallback)
 		object, err = controller.ObjectRepository.GetObject(code, fallback)
 		if err != nil {
 			return nil, err

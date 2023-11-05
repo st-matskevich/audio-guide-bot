@@ -35,22 +35,22 @@ func (controller *BotController) GetRoutes() []Route {
 func (controller *BotController) HandleBotUpdate(c *fiber.Ctx) error {
 	update := bot.Update{}
 	if err := c.BodyParser(&update); err != nil {
-		HandlerPrintf(c, "Failed to parse input - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to parse input", "error", err)
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Failed to parse input")
 	}
 
 	if update.CallbackQuery != nil {
-		HandlerPrintf(c, "Received callback query")
+		HandlerPrintf(c, LOG_INFO, "Received callback query")
 		return controller.HandleBotCallback(c, &update)
 	}
 
 	if update.PreCheckoutQuery != nil {
-		HandlerPrintf(c, "Received pre-checkout query")
+		HandlerPrintf(c, LOG_INFO, "Received pre-checkout query")
 		return controller.HandleBotPreCheckout(c, &update)
 	}
 
 	if update.Message != nil {
-		HandlerPrintf(c, "Received message")
+		HandlerPrintf(c, LOG_INFO, "Received message")
 		return controller.HandleBotMessage(c, &update)
 	}
 
@@ -61,42 +61,42 @@ func (controller *BotController) HandleBotMessage(c *fiber.Ctx, update *bot.Upda
 	locale := update.Message.From.LanguageCode
 
 	if update.Message.SuccessfulPayment != nil {
-		HandlerPrintf(c, "Message type is successful payment")
+		HandlerPrintf(c, LOG_INFO, "Message type is successful payment")
 		ticketCode, err := uuid.Parse(update.Message.SuccessfulPayment.InvoicePayload)
 		if err != nil {
-			HandlerPrintf(c, "Failed to parse bot payment payload - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Failed to parse bot payment payload", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to parse bot payment payload")
 		}
 
 		if err = controller.TicketRepository.CreateTicket(ticketCode.String()); err != nil {
-			HandlerPrintf(c, "Failed to register ticket in DB - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Failed to register ticket in DB", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to register ticket in DB")
 		}
 
 		message, options, err := controller.buildPurchaseMessage(locale, ticketCode.String())
 		if err != nil {
-			HandlerPrintf(c, "Failed to prepare message - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Failed to prepare message", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare message")
 		}
 
-		HandlerPrintf(c, "Created ticket %s, responding with payment confirmation", ticketCode.String())
+		HandlerPrintf(c, LOG_INFO, "Created ticket, responding with payment confirmation", "ticket", ticketCode.String())
 		if err := controller.BotProvider.SendMessage(update.Message.Chat.Id, message, options); err != nil {
-			HandlerPrintf(c, "Failed to send bot message - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Failed to send bot message", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 		}
 
 		return HandlerSendSuccess(c, fiber.StatusOK, nil)
 	}
 
-	HandlerPrintf(c, "Responding with welcome message")
+	HandlerPrintf(c, LOG_INFO, "Responding with welcome message")
 	message, options, err := controller.buildWelcomeMessage(locale)
 	if err != nil {
-		HandlerPrintf(c, "Failed to prepare message - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to prepare message", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare message")
 	}
 
 	if err := controller.BotProvider.SendMessage(update.Message.Chat.Id, message, options); err != nil {
-		HandlerPrintf(c, "Failed to send bot message - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to send bot message", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 	}
 
@@ -107,36 +107,36 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 	locale := update.CallbackQuery.From.LanguageCode
 
 	if update.CallbackQuery.Data == "" {
-		HandlerPrintf(c, "Bot update didn't include a callback data")
+		HandlerPrintf(c, LOG_ERROR, "Bot update didn't include a callback data")
 		return HandlerSendFailure(c, fiber.StatusBadRequest, "Bot update didn't include a callback data")
 	}
 
 	if err := controller.BotProvider.AnswerCallbackQuery(update.CallbackQuery.Id); err != nil {
-		HandlerPrintf(c, "Failed to answer callback query - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to answer callback query", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to answer callback query")
 	}
 
 	if update.CallbackQuery.Data == BUY_TICKET_QUERY {
-		HandlerPrintf(c, "Callback query is BUY_TICKET_QUERY")
+		HandlerPrintf(c, LOG_INFO, "Callback query is BUY_TICKET_QUERY")
 		if update.CallbackQuery.Message == nil {
-			HandlerPrintf(c, "Bot update didn't include a callback message")
+			HandlerPrintf(c, LOG_ERROR, "Bot update didn't include a callback message")
 			return HandlerSendFailure(c, fiber.StatusBadRequest, "Bot update didn't include a callback message")
 		}
 
 		price, err := controller.getTicketPrice(c)
 		if err != nil {
-			HandlerPrintf(c, "Failed to get ticket price - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Failed to get ticket price", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to get ticket price")
 		} else if price == nil {
-			HandlerPrintf(c, "Ticket price is not set, responding with disabled payments message")
+			HandlerPrintf(c, LOG_INFO, "Ticket price is not set, responding with disabled payments message")
 			message, options, err := controller.buildPaymentsDisabledMessage(locale)
 			if err != nil {
-				HandlerPrintf(c, "Failed to prepare message - %v", err)
+				HandlerPrintf(c, LOG_ERROR, "Failed to prepare message", "error", err)
 				return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare message")
 			}
 
 			if err := controller.BotProvider.SendMessage(update.CallbackQuery.Message.Chat.Id, message, options); err != nil {
-				HandlerPrintf(c, "Failed to send bot message - %v", err)
+				HandlerPrintf(c, LOG_ERROR, "Failed to send bot message", "error", err)
 				return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot message")
 			}
 
@@ -145,14 +145,14 @@ func (controller *BotController) HandleBotCallback(c *fiber.Ctx, update *bot.Upd
 
 		invoice, err := controller.buildInvoiceData(locale, *price)
 		if err != nil {
-			HandlerPrintf(c, "Failed to prepare invoice - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Failed to prepare invoice", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to prepare invoice")
 		}
 
 		ticketCode := uuid.New()
-		HandlerPrintf(c, "Responding with invoice for ticket %s", ticketCode.String())
+		HandlerPrintf(c, LOG_INFO, "Responding with invoice for ticket", "ticket", ticketCode.String())
 		if err := controller.BotProvider.SendInvoice(update.CallbackQuery.Message.Chat.Id, invoice.Title, invoice.Description, ticketCode.String(), invoice.Price, invoice.Options); err != nil {
-			HandlerPrintf(c, "Failed to send bot invoice - %v", err)
+			HandlerPrintf(c, LOG_ERROR, "Failed to send bot invoice", "error", err)
 			return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to send bot invoice")
 		}
 
@@ -166,13 +166,13 @@ func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.
 	locale := update.PreCheckoutQuery.From.LanguageCode
 	acceptCheckout, errorMessage, err := controller.validatePreCheckoutQuery(c, update, locale)
 	if err != nil {
-		HandlerPrintf(c, "Failed to validate pre-checkout query - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to validate pre-checkout query", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to validate pre-checkout query")
 	}
 
-	HandlerPrintf(c, "Accepting pre-checkout: %t", acceptCheckout)
+	HandlerPrintf(c, LOG_INFO, "Accepting pre-checkout", "accept", acceptCheckout)
 	if err := controller.BotProvider.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id, acceptCheckout, bot.AnswerPreCheckoutQueryOptions{ErrorMessage: errorMessage}); err != nil {
-		HandlerPrintf(c, "Failed to answer pre-checkout query - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to answer pre-checkout query", "error", err)
 		return HandlerSendError(c, fiber.StatusInternalServerError, "Failed to answer pre-checkout query")
 	}
 
@@ -182,12 +182,12 @@ func (controller *BotController) HandleBotPreCheckout(c *fiber.Ctx, update *bot.
 func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *bot.Update, locale string) (bool, *string, error) {
 	price, err := controller.getTicketPrice(c)
 	if err != nil {
-		HandlerPrintf(c, "Failed to get ticket price - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to get ticket price", "error", err)
 		return false, nil, err
 	}
 
 	if price == nil {
-		HandlerPrintf(c, "Ticket price is not set")
+		HandlerPrintf(c, LOG_ERROR, "Ticket price is not set")
 		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_PRICE_NOT_SET", locale, translation.TemplateData{})
 		if err != nil {
 			return false, nil, err
@@ -196,7 +196,7 @@ func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *
 	}
 
 	if update.PreCheckoutQuery.Currency != price.Currency {
-		HandlerPrintf(c, "Pre-checkout currency is not correct")
+		HandlerPrintf(c, LOG_WARNING, "Pre-checkout currency is not correct")
 		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_INVALID_CURRENCY", locale, translation.TemplateData{})
 		if err != nil {
 			return false, nil, err
@@ -205,7 +205,7 @@ func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *
 	}
 
 	if update.PreCheckoutQuery.TotalAmount != price.Price {
-		HandlerPrintf(c, "Pre-checkout price is not correct")
+		HandlerPrintf(c, LOG_WARNING, "Pre-checkout price is not correct")
 		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_INVALID_PRICE", locale, translation.TemplateData{})
 		if err != nil {
 			return false, nil, err
@@ -215,7 +215,7 @@ func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *
 
 	ticketCode, err := uuid.Parse(update.PreCheckoutQuery.InvoicePayload)
 	if err != nil {
-		HandlerPrintf(c, "Pre-checkout payload is not correct")
+		HandlerPrintf(c, LOG_WARNING, "Pre-checkout payload is not correct")
 		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_INVALID_TICKET", locale, translation.TemplateData{})
 		if err != nil {
 			return false, nil, err
@@ -225,12 +225,12 @@ func (controller *BotController) validatePreCheckoutQuery(c *fiber.Ctx, update *
 
 	ticket, err := controller.TicketRepository.GetTicket(ticketCode.String())
 	if err != nil {
-		HandlerPrintf(c, "Failed to get invoice ticket  - %v", err)
+		HandlerPrintf(c, LOG_ERROR, "Failed to get invoice ticket", "error", err)
 		return false, nil, err
 	}
 
 	if ticket != nil {
-		HandlerPrintf(c, "Invoice ticket %s is already sold", ticketCode.String())
+		HandlerPrintf(c, LOG_WARNING, "Invoice ticket is already sold", "ticket", ticketCode.String())
 		message, err := controller.TranslationProvider.TranslateMessage("PAYMENT_FAIL_TICKET_SOLD", locale, translation.TemplateData{})
 		if err != nil {
 			return false, nil, err
@@ -253,7 +253,7 @@ func (controller *BotController) getTicketPrice(c *fiber.Ctx) (*TicketPrice, err
 	}
 
 	if currency == nil {
-		HandlerPrintf(c, "Ticket currency key not found")
+		HandlerPrintf(c, LOG_ERROR, "Ticket currency key not found")
 		return nil, nil
 	}
 
@@ -263,7 +263,7 @@ func (controller *BotController) getTicketPrice(c *fiber.Ctx) (*TicketPrice, err
 	}
 
 	if priceString == nil {
-		HandlerPrintf(c, "Ticket price key not found")
+		HandlerPrintf(c, LOG_ERROR, "Ticket price key not found")
 		return nil, nil
 	}
 
