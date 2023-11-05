@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -59,33 +58,30 @@ func (provider *PostgresDBProvider) Exec(query string, args ...interface{}) (int
 	return rows, nil
 }
 
-func (provider *PostgresDBProvider) Migrate() error {
+func (provider *PostgresDBProvider) Migrate() (uint, error) {
 	driver, err := postgres.WithInstance(provider.connection, &postgres.Config{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	migrator, err := migrate.NewWithDatabaseInstance(
 		"file:///migrations/postgres",
 		"postgres", driver)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	err = migrator.Up()
-	if err == migrate.ErrNoChange {
-		log.Println("No changes applied to database")
-	} else if err != nil {
-		return err
+	if err != nil && err != migrate.ErrNoChange {
+		return 0, err
 	}
 
-	version, dirty, err := migrator.Version()
+	version, _, err := migrator.Version()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	log.Printf("Database version: %v, dirty - %v", version, dirty)
-	return nil
+	return version, nil
 }
 
 func CreatePostgresDBProvider(URL string) (DBProvider, error) {
