@@ -17,7 +17,21 @@ import (
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	// Replace keys to allow GCP to parse logs correctly
+	// https://cloud.google.com/logging/docs/structured-logging
+	opts := slog.HandlerOptions{
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			switch a.Key {
+			case "level":
+				a.Key = "severity"
+			case "msg":
+				a.Key = "message"
+			}
+			return a
+		},
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &opts))
 	slog.SetDefault(logger)
 
 	slog.Info("Starting API service")

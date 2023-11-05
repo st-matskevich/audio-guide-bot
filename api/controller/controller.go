@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
+	slogfiber "github.com/samber/slog-fiber"
 )
 
 type Controller interface {
@@ -31,6 +32,6 @@ func HandlerPrintf(c *fiber.Ctx, severity int, message string, v ...any) {
 		logger = slog.Error
 	}
 
-	args := append([]any{"method", c.Method(), "path", c.Path(), "request-id", c.Context().UserValue("request-id")}, v...)
+	args := append([]any{"request-id", slogfiber.GetRequestID(c)}, v...)
 	logger(message, args...)
 }
