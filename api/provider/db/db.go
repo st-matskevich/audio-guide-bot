@@ -9,5 +9,5 @@ type DBReader interface {
 type DBProvider interface {
 	Query(query string, args ...interface{}) (DBReader, error)
 	Exec(query string, args ...interface{}) (int64, error)
-	Migrate() error
+	Migrate() (uint, error)
 }

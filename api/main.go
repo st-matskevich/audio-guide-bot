@@ -34,13 +34,13 @@ func main() {
 	args := os.Args[1:]
 	if len(args) > 0 && args[0] == "--migrate" {
 		slog.Info("Running in DB migration mode")
-		err = dbProvider.Migrate()
+		version, err := dbProvider.Migrate()
 		if err != nil {
 			slog.Error("Migration failed", "error", err)
 			os.Exit(1)
 		}
 
-		slog.Info("Successfully applied DB migrations")
+		slog.Info("Successfully applied DB migrations", "version", version)
 		os.Exit(0)
 	}
 
