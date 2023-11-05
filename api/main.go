@@ -6,7 +6,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	slogfiber "github.com/samber/slog-fiber"
 	"github.com/st-matskevich/audio-guide-bot/api/controller"
 	"github.com/st-matskevich/audio-guide-bot/api/provider/auth"
 	"github.com/st-matskevich/audio-guide-bot/api/provider/blob"
@@ -17,18 +16,8 @@ import (
 )
 
 func main() {
-	// Replace keys to allow GCP to parse logs correctly
-	// https://cloud.google.com/logging/docs/structured-logging
 	opts := slog.HandlerOptions{
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			switch a.Key {
-			case "level":
-				a.Key = "severity"
-			case "msg":
-				a.Key = "message"
-			}
-			return a
-		},
+		ReplaceAttr: controller.CreateGCPLoggerAdapter(),
 	}
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &opts))
@@ -69,13 +58,7 @@ func main() {
 		}))
 	}
 
-	// Set logger format to be equal to controller.HandlerPrintf
-	app.Use(slogfiber.New(slog.Default()))
-	/*app.Use(logger.New(logger.Config{
-		Format:        "${time} ${method} ${path}: Returned ${status} in ${latency}\n",
-		TimeFormat:    "2006/02/01 15:04:05",
-		DisableColors: true,
-	}))*/
+	app.Use(controller.CreateLoggerMiddleware())
 
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	paymentsToken := os.Getenv("TELEGRAM_PAYMENTS_TOKEN")
