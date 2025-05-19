@@ -138,7 +138,7 @@ jobs:
       SERVICE_ACCOUNT: ${{ vars.GCP_SA_EMAIL }}
       MIGRATOR_SERVICE: ${{ vars.GCP_SERVICE_MIGRATOR_NAME }}
       API_IMAGE: ${{ vars.GCP_PROJECT_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY }}/${{ vars.GCP_SERVICE_API_NAME }}:${{  github.sha }}
-      SQL_INSTANCE_NAME: ${{ vars.GCP_SQL_INSTANCE_CONNECTION_NAME }}
+      # SQL_INSTANCE_NAME: ${{ vars.GCP_SQL_INSTANCE_CONNECTION_NAME }}
       DB_URL_SECRET: ${{ vars.GCP_SECRET_DB_URL }}
     runs-on: ubuntu-latest
 
@@ -152,12 +152,16 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
 
       - name: Deploy migration job to Cloud Run
+        # re-add this for cloudsql integration
+        # --set-cloudsql-instances=${{ env.SQL_INSTANCE_NAME }}
         run: |-
           gcloud --quiet run jobs deploy ${{ env.MIGRATOR_SERVICE }} \
           --image=${{ env.API_IMAGE }} \
           --region=${{ env.PROJECT_REGION }} \
           --service-account=${{ env.SERVICE_ACCOUNT }} \
-          --set-cloudsql-instances=${{ env.SQL_INSTANCE_NAME }} \
+          --network=default \
+          --subnet=default \
+          --vpc-egress=private-ranges-only \
           --set-secrets=DB_CONNECTION_STRING=${{ env.DB_URL_SECRET }}:latest \
           --args=--migrate \
           --max-retries=3 \
@@ -177,7 +181,7 @@ jobs:
       UI_SERVICE: ${{ vars.GCP_SERVICE_UI_NAME }}
       UI_MAX_INSTANCES: ${{ vars.GCP_SERVICE_UI_MAX_INSTANCES }}
       UI_IMAGE: ${{ vars.GCP_PROJECT_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY }}/${{ vars.GCP_SERVICE_UI_NAME }}:${{  github.sha }}
-      SQL_INSTANCE_NAME: ${{ vars.GCP_SQL_INSTANCE_CONNECTION_NAME }}
+      # SQL_INSTANCE_NAME: ${{ vars.GCP_SQL_INSTANCE_CONNECTION_NAME }}
       TG_TOKEN_SECRET: ${{ vars.GCP_SECRET_TG_BOT_TOKEN }}
       TG_PAYMENTS_SECRET: ${{ vars.GCP_SECRET_TG_PAYMENTS_TOKEN }}
       JWT_SECRET: ${{ vars.GCP_SECRET_JWT_SECRET }}
@@ -201,12 +205,16 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
       
       - name: Deploy API service to Cloud Run
+        # re-add this for cloudsql integration
+        # --set-cloudsql-instances=${{ env.SQL_INSTANCE_NAME }}
         run: |-
           gcloud --quiet run deploy ${{ env.API_SERVICE }} \
           --image=${{ env.API_IMAGE }} \
           --region=${{ env.PROJECT_REGION }} \
           --service-account=${{ env.SERVICE_ACCOUNT }} \
-          --set-cloudsql-instances=${{ env.SQL_INSTANCE_NAME }} \
+          --network=default \
+          --subnet=default \
+          --vpc-egress=private-ranges-only \
           --max-instances=${{ env.API_MAX_INSTANCES }} \
           --set-secrets=TELEGRAM_BOT_TOKEN=${{ env.TG_TOKEN_SECRET }}:latest \
           --set-secrets=TELEGRAM_PAYMENTS_TOKEN=${{ env.TG_PAYMENTS_SECRET }}:latest \
