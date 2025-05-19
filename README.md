@@ -122,6 +122,8 @@ Deployment setup:
 
 After successful deployment, obtain the bot API URL from either `deploy-services` job results or from [GCP Project Console](https://console.cloud.google.com) and proceed to [switching bot environment](#switching-bot-environment).
 
+Alternatively, to fit within the [GCP free tier](https://cloud.google.com/free/docs/free-cloud-features#free-tier), you can deploy PostgreSQL on an e2-micro Compute Engine VM and connect Cloud Run services using [Direct VPC](https://cloud.google.com/run/docs/configuring/vpc-direct-vpc). However, because a self-managed PostgreSQL instance requires additional configuration and operational oversight, this approach is not covered in this instruction.
+
 ## Switching bot environment
 After the bot is either [launched locally](#local-environment) or [deployed in GCP](#production-deployment), Telegram needs to be configured with a proper webhook URL. To set it, use:
 ```sh
